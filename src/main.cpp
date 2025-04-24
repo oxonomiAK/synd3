@@ -1,17 +1,23 @@
 #include <iostream>
-#include "../include/ncurs.h"
-#include "../include/func.h"
+#include "ncurs.h"
+#include "core/process.h"
+#include <thread>
+#include <chrono>
 
 int main()
 {
 
-    std::cout << "Starting of main thread of glance..." << std::endl;
+    NcursesUI ui;
+    ui.init();
 
-    int x = 5;
+    while (true)
+    {
+        std::vector<Process> processes = fetchProcesses();
+        ui.render(processes);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 
-    std::cout << "do_test_mult from \'func.c\': " << do_test_mult(&x) << std::endl;
-
-    init_ui();
+    ui.shutdown();
 
     return 0;
 }
