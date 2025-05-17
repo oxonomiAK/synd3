@@ -2,7 +2,7 @@
 #define PROCESS_H
 
 #include <string>
-#include "core/process_Info.h"
+#include "process_Info.h"
 #include <vector>
 
 class Process

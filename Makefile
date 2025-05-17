@@ -20,4 +20,5 @@ glance: $(OBJ_C) $(OBJ_CPP)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f src/*.o glance
+	find src -name '*.o' -delete
+	rm -f glance
