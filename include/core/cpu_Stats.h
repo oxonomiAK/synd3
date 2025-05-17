@@ -14,6 +14,10 @@ extern "C"
     } CpuStats;
 
     int get_cpu_stats(CpuStats *out);
+    void getProcStat(char *buffer, const int size);
+    float calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
+    float getTotalCpuUsage();
+
 
 #ifdef __cplusplus
 }
