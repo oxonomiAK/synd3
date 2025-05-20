@@ -2,7 +2,7 @@
 #define NCURS_H
 
 #include <vector>
-#include "../include/core/process.h"
+#include "core/process.h"
 
 class NcursesUI
 {

@@ -6,6 +6,8 @@ extern "C"
 {
 #endif
 
+#define CPU_STAT_BUFFER_SIZE 1024
+
     typedef struct
     {
         char cpuName[128];
@@ -26,6 +28,9 @@ extern "C"
     void CpuName();
     void getThreadCount(size_t *threadCount, size_t threadCountSize);
     void ThreadCount();
+    unsigned long long getTotalCpuTck(char *prevBuffer, char *currentBuffer);
+    unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
+
 #ifdef __cplusplus
 }
 #endif
