@@ -6,6 +6,8 @@ extern "C"
 {
 #endif
 
+#define CPU_STAT_BUFFER_SIZE 1024
+
     typedef struct
     {
         float total_usage;
@@ -14,6 +16,11 @@ extern "C"
     } CpuStats;
 
     int get_cpu_stats(CpuStats *out);
+    void getProcStat(char *buffer, const int size);
+    float calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
+    float getTotalCpuUsage();
+    unsigned long long getTotalCpuTck(char *prevBuffer, char *currentBuffer);
+    unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
 
 #ifdef __cplusplus
 }
