@@ -8,17 +8,24 @@ extern "C"
 
     typedef struct
     {
-        float total_usage;
-        float per_core[32];
-        int core_count;
+        char cpuName[128];
+        float totalUsage;
+        float perCore[32];
+        size_t coreCount;
+        size_t threadCount;
     } CpuStats;
-
+    
     int get_cpu_stats(CpuStats *out);
     void getProcStat(char *buffer, const int size);
-    float calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
-    float getTotalCpuUsage();
-
-
+    void calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
+    void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer);
+    void getTotalCpuUsage();
+    void getCpuStats(float *total_usage, float *per_core, size_t size1, size_t size2);
+    void CoreCount();
+    void getCoreCount(size_t *coreCount, size_t coreCountSize);
+    void CpuName();
+    void getThreadCount(size_t *threadCount, size_t threadCountSize);
+    void ThreadCount();
 #ifdef __cplusplus
 }
 #endif
