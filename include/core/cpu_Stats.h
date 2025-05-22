@@ -17,7 +17,7 @@ extern "C"
         size_t threadCount;
     } CpuStats;
 
-    int get_cpu_stats(CpuStats *out);
+    int get_cpu_stats(CpuStats *out); // neutral func
     void getProcStat(char *buffer, const int size);
     void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer);
     void getCpuStats(float *total_usage, float *per_core, size_t size1, size_t size2);
@@ -27,8 +27,8 @@ extern "C"
     void getThreadCount(size_t *threadCount, size_t threadCountSize);
     void ThreadCount();
     void getProcStat(char *buffer, const int size);
-    float calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
-    float getTotalCpuUsage();
+    void calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
+    void getTotalCpuUsage();
     unsigned long long getTotalCpuTck(char *prevBuffer, char *currentBuffer);
     unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
 
