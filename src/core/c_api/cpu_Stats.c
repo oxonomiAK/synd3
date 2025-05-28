@@ -192,3 +192,7 @@ void getTotalCpuUsage()
     calcTotalCpuUsage(prevBuffer, currentBuffer);
     calcEveryCoreUsage(prevBuffer, currentBuffer);
 }
+
+    calcTotalCpuUsage(prevBuffer, currentBuffer);
+    calcEveryCoreUsage(prevBuffer, currentBuffer);
+}
