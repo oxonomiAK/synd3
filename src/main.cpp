@@ -1,46 +1,23 @@
-
-
 #include <iostream>
-#include <thread>
 #include <chrono>
 #include "core/process.h"
 #include <algorithm>
-#include <atomic>
 #include "MainWindow.h"
 
-std::atomic<bool> running(true);
-std::mutex mtx, mtx1;
-std::vector<Process> processes;
-
-
-void initHandling(MainWindow& ui){   
-    std::lock_guard<std::mutex> lock(mtx);
-    while (running.load()) {
-        bool stillRunning = ui.handleInput(processes.size());
-        if (!stillRunning) {
-            running.store(false);
-            break;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-    }
-
-}
 
 int main() {
-    std::lock_guard<std::mutex> lock(mtx1);
+    bool running = true;
+    std::vector<Process> processes;
     MainWindow ui(processes);  
     ui.init();
 
-
-
-    std::thread inputHandle(initHandling, std::ref(ui));
-    while (running.load()) {
+    while (running) {
 
         if(!ui.getShowPopupWindow()) {
             processes = fetchProcesses();
         
-        
+            running = ui.handleInput(processes.size());
+
             int col = ui.getSelectedColumn();
             std::sort(processes.begin(), processes.end(), [col](const Process& a, const Process& b){
                 switch (col) {
@@ -55,9 +32,9 @@ int main() {
 
         }
         ui.render(processes);
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(23));
     }
     ui.shutdown();
-    inputHandle.join();
+    endwin();
     return 0;
 }    

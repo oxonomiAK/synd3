@@ -21,9 +21,12 @@ void LeftPanel::init() {
 }
 
 void LeftPanel::render(const std::vector<Process>& processes) {
- int width = 30;
+    int width = 30;
+    int currentheight= getmaxy(window_);
+    
     size_t corecount;
     getThreadCount(&corecount, sizeof(corecount));
+    
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
     for (int y = 1; y < LINES-1; y++) {
         mvwaddch(window_, y, width, ACS_VLINE);
@@ -46,11 +49,11 @@ void LeftPanel::render(const std::vector<Process>& processes) {
 
     // CPU per-core
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, 9, 1, " Per core usage: ");
+    mvwprintw(window_, 6, 1, " Per core usage: ");
     for (int i = 0; i < (int)corecount; i++) {
         float usage = cpuStats.percore[i];
         wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
-        mvwprintw(window_, 10 + i, 2, "CPU%-2d:", i);
+        mvwprintw(window_, 7 + i, 2, "CPU%-2d:", i);
         wattron(window_, COLOR_PAIR(CPU_BAR_COLOR));
         wprintw(window_, " [");
         int bars = (int)(usage / 10);
@@ -84,10 +87,10 @@ void LeftPanel::render(const std::vector<Process>& processes) {
     time_t now = time(nullptr);
     int uptime = (int)difftime(now, start_time);
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, 6, 2, "Uptime: %02d:%02d:%02d",
+    mvwprintw(window_, currentheight-5, 2, "Uptime: %02d:%02d:%02d",
              uptime/3600, (uptime%3600)/60, uptime%60);
-    mvwprintw(window_, 7, 2, "Tasks: %ld, %d running", processes.size(), 2);
-    mvwprintw(window_, 7, 2, "Load avg: 0.15, 0.30, 0.25");
+    mvwprintw(window_, currentheight-4, 2, "Tasks: %ld, %d running", processes.size(), 2);
+    mvwprintw(window_, currentheight-3, 2, "Load avg: 0.15, 0.30, 0.25");
     // wrefresh(window_);
 }
 

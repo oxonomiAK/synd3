@@ -23,7 +23,7 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     char totalCPUUsageBuffer[16];
     wattron(window_, COLOR_PAIR(HEADER_COLOR));
 
-    int widths[TOTAL_COLUMNS] = {8, 34, 9, 8};
+    int widths[TOTAL_COLUMNS] = {8, 34, 10, 8};
     
     const char* headers[TOTAL_COLUMNS] = {"PID", "NAME", "CPU", "MEM%"};
     snprintf(totalCPUUsageBuffer, sizeof(totalCPUUsageBuffer), "CPU%% %.2f ", cpuStats.total);
@@ -56,14 +56,14 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
         wprintw(window_, "%5.1f ", p.getCpuUsage());
         wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
-        wprintw(window_, "%10.1f", p.getMemUsage());
+        wprintw(window_, "%11.1f", p.getMemUsage());
         wattroff(window_, COLOR_PAIR(SELECTED_COLOR));
         wattroff(window_, COLOR_PAIR(PROCESS_COLOR));
     }
 
 
     wattron(window_, COLOR_PAIR(FOOTER_COLOR));
-    mvwprintw(window_, LINES - 1, 0, " F1:Help  F2:Setup  F3:Search  F4:Filter  F5:Tree  F6:SortBy  F7:Nice  F8:Kill  F9:Quit ");
+    mvwprintw(window_, LINES - 1, 0, " F1:Help  F8:Kill  F9:Quit ");
     wattroff(window_, COLOR_PAIR(FOOTER_COLOR));
 
     // wrefresh(window_);
