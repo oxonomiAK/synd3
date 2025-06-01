@@ -3,10 +3,13 @@
 
 #include "Window.h"
 #include <ncurses.h>
+#include <string>
+#include <vector>
+#include "core/process.h"
 
 class PopupWindow : public Window {
 public:
-    PopupWindow(WINDOW* parent, int height, int width, int starty, int startx, std::string message );
+    PopupWindow(WINDOW* parent, int height, int width, int starty, int startx, std::string message);
     ~PopupWindow();
 
     void render(const std::vector<Process>& processes) override;
@@ -22,8 +25,14 @@ public:
 private:
     bool visible_;
     std::string message_;
+    WINDOW* parent_;       
     WINDOW* win_;
-    int selectedProcess_ = 0; 
+    int selectedProcess_ = 0;
+
+    int desiredHeight_;
+    int desiredWidth_;
+    int startY_;
+    int startX_;
 };
 
 #endif // POPUP_WINDOW_H

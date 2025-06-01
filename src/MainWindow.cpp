@@ -111,6 +111,8 @@ void MainWindow::showPopup(size_t totalProcesses) {
         processTable_->setshowPopup(showPopupWindow_);
 
 }
+
+
 bool MainWindow::handleInput(size_t totalProcesses) {
     running.store(processTable_->handleInput(totalProcesses));
     showPopupWindow_ = processTable_->getShowPopup();

@@ -21,36 +21,49 @@ void LeftPanel::init() {
 }
 
 void LeftPanel::render(const std::vector<Process>& processes) {
-    int width = 30;
-    int currentheight= getmaxy(window_);
-    
+    const int panel_width = 30;  // fixed width for left panel
+    int max_y, max_x;
+    getmaxyx(window_, max_y, max_x);
+
     size_t corecount;
     getThreadCount(&corecount, sizeof(corecount));
-    
+
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    for (int y = 1; y < LINES-1; y++) {
-        mvwaddch(window_, y, width, ACS_VLINE);
+    // Draw vertical separator line at panel_width
+    for (int y = 1; y < max_y - 1; y++) {
+        mvwaddch(window_, y, panel_width, ACS_VLINE);
     }
+
     wattron(window_, COLOR_PAIR(TITLE_COLOR));
     mvwprintw(window_, 1, 1, " System Information ");
     wattroff(window_, COLOR_PAIR(TITLE_COLOR));
 
-    // CPU Usage 
+    // Memory Usage bar at fixed position near the top
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    // mvwprintw(window_, 3, 2, "CPU Usage:");
-    // wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
+    mvwprintw(window_, 3, 2, "Memory Usage:");
 
-    
-    
-    // char totalCPUUsageBuffer[16];
-    // fillTotalCpuUsage(total, totalCPUUsageBuffer, sizeof(totalCPUUsageBuffer));
+    int mem_bar_width = panel_width - 4 - 12; // 12 for labels and spacing
+    float mem_percent = 70.0f; // example placeholder value
+    int mem_bars = (int)(mem_bar_width * mem_percent / 100.0f);
+    wattron(window_, COLOR_PAIR(MEM_BAR_COLOR));
+    mvwprintw(window_, 4, 2, "[");
+    for (int i = 0; i < mem_bar_width; i++) {
+        waddch(window_, i < mem_bars ? ACS_CKBOARD : ' ');
+    }
+    wprintw(window_, "]");
+    wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
+    wprintw(window_, " %2.0f%% of 16G", mem_percent);
 
-    // mvwprintw(window_, 3, 12,"%s%%", totalCPUUsageBuffer); // placeholder for total CPU usage
-
-    // CPU per-core
+    // CPU per-core usage - clipped if not enough space at bottom
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
     mvwprintw(window_, 6, 1, " Per core usage: ");
-    for (int i = 0; i < (int)corecount; i++) {
+
+    // Calculate how many lines are available for core bars without overlapping bottom system info
+    int system_info_lines = 5;  // number of lines reserved at bottom for uptime etc.
+    int available_lines_for_cpu = max_y - 7 - system_info_lines; 
+    int cores_to_show = std::min((int)corecount, available_lines_for_cpu);
+
+    for (int i = 0; i < cores_to_show; i++) {
         float usage = cpuStats.percore[i];
         wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
         mvwprintw(window_, 7 + i, 2, "CPU%-2d:", i);
@@ -65,38 +78,19 @@ void LeftPanel::render(const std::vector<Process>& processes) {
         wprintw(window_, "%2.1f%%", usage);
     }
 
-    // Memory Usage
-    wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, 3, 2, "Memory Usage:");
-
-    int panel_width = width - 4;
-    int bar_width = panel_width - 12; 
-    float mem_percent = 70.0f; // placeholder for memory usage percentage
-    int mem_bars = (int)(bar_width * mem_percent / 100.0f);
-    wattron(window_, COLOR_PAIR(MEM_BAR_COLOR));
-    mvwprintw(window_, 4, 2, "[");
-    for (int i = 0; i < bar_width; i++) {
-        waddch(window_, i < mem_bars ? ACS_CKBOARD : ' ');
-    }
-    wprintw(window_, "]");
-
-    wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
-    wprintw(window_, " %2.0f%% of 16G", mem_percent);
-
-    // System Info
+    // System information at the bottom (fixed position)
     time_t now = time(nullptr);
     int uptime = (int)difftime(now, start_time);
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, currentheight-5, 2, "Uptime: %02d:%02d:%02d",
-             uptime/3600, (uptime%3600)/60, uptime%60);
-    mvwprintw(window_, currentheight-4, 2, "Tasks: %ld, %d running", processes.size(), 2);
-    mvwprintw(window_, currentheight-3, 2, "Load avg: 0.15, 0.30, 0.25");
-    // wrefresh(window_);
+    mvwprintw(window_, max_y - 5, 2, "Uptime: %02d:%02d:%02d",
+             uptime / 3600, (uptime % 3600) / 60, uptime % 60);
+    mvwprintw(window_, max_y - 4, 2, "Tasks: %ld, %d running", processes.size(), 2);
+    mvwprintw(window_, max_y - 3, 2, "Load avg: 0.15, 0.30, 0.25");
 }
 
-bool LeftPanel::handleInput(size_t totalProcesses) {
+bool LeftPanel::handleInput(size_t /*totalProcesses*/) {
     // Nothing to handle for now
-    totalProcesses = totalProcesses; // Avoid unused parameter warning
+
     return true;
 }
 
