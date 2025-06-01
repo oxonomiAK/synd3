@@ -98,10 +98,20 @@ void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer)
         unsigned long long NonIdle = user + nice + system + irq + softirq + steal;
         unsigned long long PrevTotal = PrevIdle + PrevNonIdle;
         unsigned long long Total = Idle + NonIdle;
-
+        
         unsigned long long deltaTotal = Total - PrevTotal;
         unsigned long long deltaIdle = Idle - PrevIdle;
-
+        if (deltaIdle > deltaTotal) {
+            if (i >= 9)
+            {
+                count++;
+            }
+            pBuffer = prevBuffer + count + strcspn(prevBuffer, "\n") + 2;
+            cBuffer = currentBuffer + count + strcspn(currentBuffer, "\n") + 2;
+            count = count + strcspn(pBuffer, "\n") + 2;
+            continue;
+        }
+        
         cpustats.perCore[i] = (float)(deltaTotal - deltaIdle) / (float)deltaTotal * 100.0f;
         if (i >= 9)
         {
@@ -191,8 +201,5 @@ void getTotalCpuUsage()
 
     calcTotalCpuUsage(prevBuffer, currentBuffer);
     calcEveryCoreUsage(prevBuffer, currentBuffer);
-}
 
-    calcTotalCpuUsage(prevBuffer, currentBuffer);
-    calcEveryCoreUsage(prevBuffer, currentBuffer);
 }

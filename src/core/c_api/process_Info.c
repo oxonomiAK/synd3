@@ -61,7 +61,7 @@ void process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t
 
     if (file == NULL)
     {
-        perror("Could not open stat file");
+        // perror("Could not open stat file");
         return;
     }
 

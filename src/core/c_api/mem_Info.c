@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <unistd.h> 
 #include <stdbool.h>
-// #include"core/mem_Info.h"
-#include "/home/arlive/glance/include/core/mem_Info.h"
+#include"core/mem_Info.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -55,7 +54,7 @@ void MemTotal(){
 
     fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
     
-    char* temp = buffer+9;
+    char* temp = buffer+9; 
     meminfo.memTotal = atoi(temp);
     fclose(file);
 }
@@ -154,14 +153,4 @@ void MemUsed(){
     getBuffers(&buffers, sizeof(buffers));
     getCachedMem(&cachedMem, sizeof(cachedMem));
     meminfo.memUsedInMB = (memTotalUsed-(buffers+cachedMem))/1024;
-}
-int main(){
-    size_t MemTotal;
-    while(true){
-        getMemUsedInMB(&MemTotal, sizeof(MemTotal)); 
-        printf("%ld\n", MemTotal);
-        sleep(1);
-    }
-
-    return 0;
 }
