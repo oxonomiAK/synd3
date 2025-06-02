@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 #define CPU_STAT_BUFFER_SIZE 1024
-
+#include <stddef.h>    // size_t
     typedef struct
     {
         char cpuName[128];

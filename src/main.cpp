@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include "core/cpu_Stats.h"
+#include "core/mem_Info.h"
 #include <unistd.h>
 int main()
 {
@@ -33,6 +34,14 @@ int main()
     //         printf("Core:%d = %f%% \n",i,perCore[i]);
     //     }
 
+    // }
+
+    // size_t MemTotal;
+    // while (true)
+    // {
+    //     getMemUsedInMB(&MemTotal, sizeof(MemTotal));
+    //     printf("%ld\n", MemTotal);
+    //     sleep(1);
     // }
     return 0;
 }
