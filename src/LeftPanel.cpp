@@ -84,8 +84,8 @@ void LeftPanel::render(const std::vector<Process>& processes) {
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
     mvwprintw(window_, max_y - 5, 2, "Uptime: %02d:%02d:%02d",
              uptime / 3600, (uptime % 3600) / 60, uptime % 60);
-    mvwprintw(window_, max_y - 4, 2, "Tasks: %ld, %d running", processes.size(), 2);
-    mvwprintw(window_, max_y - 3, 2, "Load avg: 0.15, 0.30, 0.25");
+    mvwprintw(window_, max_y - 4, 2, "Tasks: %ld, %ld running", processes.size(), cpuStats.runningTasks);
+    mvwprintw(window_, max_y - 3, 2, "Load avg: %.2f %.2f %.2f", cpuStats.loadAvg[0], cpuStats.loadAvg[1], cpuStats.loadAvg[2]);
 }
 
 bool LeftPanel::handleInput(size_t /*totalProcesses*/) {

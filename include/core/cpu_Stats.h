@@ -10,6 +10,8 @@ extern "C"
 #include <stddef.h>    // size_t
     typedef struct
     {
+        float loadAvg[3];
+        size_t runningTasks;
         char cpuName[128];
         float totalUsage;
         float perCore[32];
@@ -32,9 +34,9 @@ extern "C"
     void getProcStat(char *buffer, const int size);
     void calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
     void getTotalCpuUsage();
-    unsigned long long getTotalCpuTck(char *prevBuffer, char *currentBuffer);
+    void getLoadavgAndRunningTasks(float *loadAvg, size_t *ruinningTasks, size_t loadAvgSize, size_t runningTasksSize);
     unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
-
+    void LoadAvgAndRunningTasks();
 #ifdef __cplusplus
 }
 #endif

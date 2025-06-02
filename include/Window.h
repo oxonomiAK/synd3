@@ -5,7 +5,8 @@
 #include "core/process.h"
 
 struct CpuStatistics {
-    float total, percore[32];
+    float total, loadAvg[3], percore[32];
+    size_t runningTasks = 0;
 };
 
 class Window {

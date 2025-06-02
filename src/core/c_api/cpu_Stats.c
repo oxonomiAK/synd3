@@ -145,6 +145,12 @@ void getThreadCount(size_t *threadCount, size_t threadCountSize)
     ThreadCount();
     memcpy(threadCount, &cpustats.threadCount, threadCountSize);
 }
+void getLoadavgAndRunningTasks(float *loadAvg, size_t *ruinningTasks, size_t loadAvgSize, size_t runningTasksSize)
+{
+    LoadAvgAndRunningTasks();
+    memcpy(loadAvg, &cpustats.loadAvg, loadAvgSize);
+    memcpy(ruinningTasks, &cpustats.runningTasks, runningTasksSize);
+}
 
 void CoreCount()
 {
@@ -183,6 +189,20 @@ void CpuName()
     fclose(file);
 }
 
+void LoadAvgAndRunningTasks()
+{
+    FILE *file = fopen("/proc/loadavg", "r");
+    if (file == NULL)
+    {
+        perror("Could not open loadavg file");
+        return;
+    }
+    char buffer[CPU_STAT_BUFFER_SIZE];
+    fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
+    fclose(file);
+
+   sscanf(buffer, "%f %f %f %ld/%*d %*d", &cpustats.loadAvg[0], &cpustats.loadAvg[1], &cpustats.loadAvg[2], &cpustats.runningTasks);
+}
 void ThreadCount()
 {
     cpustats.threadCount = sysconf(_SC_NPROCESSORS_ONLN);

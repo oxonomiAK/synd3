@@ -72,7 +72,9 @@ void MainWindow::init() {
 void MainWindow::updateStatsLoop() {
     std::lock_guard<std::mutex> lock(mtx);
     while (running) {
-        getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));    }
+        getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));    
+        getLoadavgAndRunningTasks(cpu.loadAvg, &cpu.runningTasks, sizeof(cpu.loadAvg), sizeof(cpu.runningTasks));
+    }
 }
 
 

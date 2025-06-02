@@ -22,6 +22,7 @@ private:
     WINDOW* win_ = nullptr;
     bool visible_ = false;
     std::string aboutText_;
+    int scrollOffset_ = 0;
 };
 
 #endif // ABOUT_WINDOW_H
