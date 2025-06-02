@@ -24,7 +24,9 @@ public:
 
     bool getShowPopup() const;
     void setshowPopup(bool pressed);
-    void resize(int height, int width, int start_y, int start_x);
+
+    bool getShowAbout() const;
+    void setShowAbout(bool pressed);
 private:
     size_t totalProcesses;
     WINDOW* window_;
@@ -34,6 +36,7 @@ private:
     int selected_column;
     CpuStatistics& cpuStats;
     bool showPopup = false;
+    bool showAbout = false;
 };
 
 #endif

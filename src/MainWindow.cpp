@@ -48,6 +48,10 @@ void MainWindow::init() {
     popupWindow_->init();
     showPopupWindow_ = false;
 
+    aboutWindow_ = new AboutWindow(mainWin_);
+    aboutWindow_->init();
+    showAboutWindow_ = false;
+
     // Initialize color pairs here or in main
     init_pair(TITLE_COLOR, 16, COLOR_CYAN);
     init_pair(HEADER_COLOR, 144, 17);
@@ -68,8 +72,7 @@ void MainWindow::init() {
 void MainWindow::updateStatsLoop() {
     std::lock_guard<std::mutex> lock(mtx);
     while (running) {
-        getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));
-    }
+        getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));    }
 }
 
 
@@ -80,11 +83,15 @@ void MainWindow::render(const std::vector<Process>& processes) {
 
     leftPanel_->render(processes);
     processTable_->render(processes);
+
     if (showPopupWindow_) {
         popupWindow_->render(processes);
  
     }
-    // Popup window placeholder
+    if (showAboutWindow_) {
+        aboutWindow_->render(processes);
+    }
+
 
 
     // // Overlay window placeholder
@@ -102,23 +109,35 @@ void MainWindow::render(const std::vector<Process>& processes) {
     wrefresh(mainWin_);
 }
 void MainWindow::showPopup(size_t totalProcesses) {
-        popupWindow_->show("Are you sure you want to kill this process?");
-        popupWindow_->setSelectedProcess(processTable_->getSelectedProcess());
-        popupWindow_->render(processes);
-
-        
-        showPopupWindow_ = popupWindow_->handleInput(totalProcesses);
-        processTable_->setshowPopup(showPopupWindow_);
+    popupWindow_->show("Are you sure you want to kill this process?");
+    popupWindow_->setSelectedProcess(processTable_->getSelectedProcess());
+    popupWindow_->render(processes);
+    
+    showPopupWindow_ = popupWindow_->handleInput(totalProcesses);
+    processTable_->setshowPopup(showPopupWindow_);
 
 }
 
+void MainWindow::showAbout(size_t totalProcesses) {
+    aboutWindow_->show();
+    aboutWindow_->render(processes);
+
+    
+    showAboutWindow_ = aboutWindow_->handleInput(totalProcesses);
+    processTable_->setShowAbout(showPopupWindow_);
+}
 
 bool MainWindow::handleInput(size_t totalProcesses) {
     running.store(processTable_->handleInput(totalProcesses));
     showPopupWindow_ = processTable_->getShowPopup();
+    showAboutWindow_ = processTable_->getShowAbout();
    
     if (showPopupWindow_) {
         showPopup(totalProcesses);
+    }
+
+    if(showAboutWindow_) {
+        showAbout(totalProcesses);
     }
 
     return running.load();
@@ -150,4 +169,8 @@ void MainWindow::shutdown() {
 
 bool MainWindow::getShowPopupWindow() const {
     return showPopupWindow_;
+}
+
+bool MainWindow::getShowAboutWindow() const {
+    return showAboutWindow_;
 }

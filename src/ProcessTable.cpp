@@ -181,8 +181,8 @@ int ch = getch();
         case KEY_F(8):
             showPopup = true; 
             break;
-        case KEY_F(6):
-            selected_column = (selected_column + 1) % TOTAL_COLUMNS;
+        case KEY_F(1):
+            showAbout = true;
             break;
         case KEY_MOUSE:
             if (getmouse(&event) == OK) {
@@ -228,4 +228,10 @@ bool ProcessTable::getShowPopup() const {
 }
 void ProcessTable::setshowPopup(bool pressed) {
     showPopup = pressed;
+}
+bool ProcessTable::getShowAbout() const {
+    return showAbout;
+}
+void ProcessTable::setShowAbout(bool pressed) {
+    showAbout = pressed;
 }
