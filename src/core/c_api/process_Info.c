@@ -25,7 +25,7 @@ void get_process_ticks(pid_t pid, unsigned long long *buff)
 
     fclose(file);
 
-    buff = utime + stime;
+    *buff = utime + stime;
 }
 
 float calc_process_cpu_usage(unsigned long long prevProcessTicks, unsigned long long currProcessTicks, char *prevTotalBuff, char *currTotalBuff)
@@ -42,13 +42,13 @@ float get_process_cpu_usage(pid_t pid)
     char prevTotalBuffer[CPU_STAT_BUFFER_SIZE];
     char currTotalBuffer[CPU_STAT_BUFFER_SIZE];
     unsigned long long prevProcessTicks = 0;
-    get_process_ticks(pid, prevProcessTicks);
+    get_process_ticks(pid, &prevProcessTicks);
     getProcStat(prevTotalBuffer, CPU_STAT_BUFFER_SIZE);
 
     sleep(1);
 
     unsigned long long currProcessTicks = 0;
-    get_process_ticks(pid, currProcessTicks);
+    get_process_ticks(pid, &currProcessTicks);
     getProcStat(currTotalBuffer, CPU_STAT_BUFFER_SIZE);
 
     float processCpu_Percentage = calc_process_cpu_usage(prevProcessTicks, currProcessTicks, prevTotalBuffer, currTotalBuffer);

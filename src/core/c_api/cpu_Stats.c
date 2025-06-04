@@ -101,6 +101,17 @@ void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer)
 
         unsigned long long deltaTotal = Total - PrevTotal;
         unsigned long long deltaIdle = Idle - PrevIdle;
+        if (deltaIdle > deltaTotal)
+        {
+            if (i >= 9)
+            {
+                count++;
+            }
+            pBuffer = prevBuffer + count + strcspn(prevBuffer, "\n") + 2;
+            cBuffer = currentBuffer + count + strcspn(currentBuffer, "\n") + 2;
+            count = count + strcspn(pBuffer, "\n") + 2;
+            continue;
+        }
 
         cpustats.perCore[i] = (float)(deltaTotal - deltaIdle) / (float)deltaTotal * 100.0f;
         if (i >= 9)
@@ -142,7 +153,7 @@ void CoreCount()
     char buffer[CPU_STAT_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 12; i++)
@@ -160,7 +171,7 @@ void CpuName()
     char buffer[CPU_STAT_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 4; i++)

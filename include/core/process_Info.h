@@ -20,8 +20,9 @@ extern "C"
 
     size_t get_process_list(ProcessInfo *buffer, size_t max);
     float calc_process_cpu_usage(unsigned long long prevProcessTicks, unsigned long long currProcessTicks, char *prevTotalBuff, char *currTotalBuff);
-    unsigned long long get_process_ticks(pid_t pid);
+    void get_process_ticks(pid_t pid, unsigned long long *buff);
     float get_process_cpu_usage(pid_t pid);
+    void process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t pid);
 
 #ifdef __cplusplus
 }
