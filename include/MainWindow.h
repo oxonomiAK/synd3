@@ -9,11 +9,8 @@
 #include <vector>
 #include "core/process.h"
 #include <ncurses.h>
-#include <thread>
-#include <atomic>
-#include <mutex>
 #include "core/cpu_Stats.h"
-
+#include "core/mem_Info.h"
 
 
 class MainWindow : public Window {
@@ -30,6 +27,8 @@ public:
     void setSelectedColumn(int col);
     bool getShowPopupWindow() const;
     bool getShowAboutWindow() const;
+    SysStatistics& getSysStatisics();
+
 private:
     void showAbout(size_t totalProcesses);
     void showPopup(size_t totalProcesses);
@@ -45,12 +44,9 @@ private:
     bool showPopupWindow_ = false;
     bool showOverlayWindow_ = false;
     bool showAboutWindow_ = false;
-    std::vector<Process> &processes;
-    std::thread updateStatsThread;
-    void updateStatsLoop();         
-    std::atomic<bool> running;
-    std::mutex mtx;
-    CpuStatistics cpu;
+    std::vector<Process> &processes;       
+    bool running = true;
+    SysStatistics SysStat;
 };
 
 #endif

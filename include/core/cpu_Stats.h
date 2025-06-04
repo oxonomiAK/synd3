@@ -25,8 +25,8 @@ extern "C"
     void getProcStat(char *buffer, const int size);
     void calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
     void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer);
-    void getTotalCpuUsage();
-    void getCpuStats(float *total_usage, float *per_core, size_t size1, size_t size2);
+    void getTotalCpuUsage(char *prevBuffer, char *currentBuffer);
+    void getCpuStats(float *totalUsage, float *perCore, size_t totalUsageSize, size_t perCoreSize, char *prevBuffer, char *currentBuffer);  
     void CoreCount();
     void getCoreCount(size_t *coreCount, size_t coreCountSize);
     void CpuName();

@@ -136,9 +136,9 @@ void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer)
         count = count + strcspn(pBuffer, "\n") + 2;
     }
 }
-void getCpuStats(float *totalUsage, float *perCore, size_t totalUsageSize, size_t perCoreSize)
+void getCpuStats(float *totalUsage, float *perCore, size_t totalUsageSize, size_t perCoreSize, char *prevBuffer, char *currentBuffer)
 {
-    getTotalCpuUsage();
+    getTotalCpuUsage(prevBuffer, currentBuffer);
     memcpy(totalUsage, &cpustats.totalUsage, totalUsageSize);
     memcpy(perCore, &cpustats.perCore, perCoreSize);
 }
@@ -251,16 +251,16 @@ void ThreadCount()
     cpustats.threadCount = sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-void getTotalCpuUsage()
+void getTotalCpuUsage(char *prevBuffer, char *currentBuffer)
 {
-    char prevBuffer[CPU_STAT_BUFFER_SIZE];
-    char currentBuffer[CPU_STAT_BUFFER_SIZE];
+    // char prevBuffer[CPU_STAT_BUFFER_SIZE];
+    // char currentBuffer[CPU_STAT_BUFFER_SIZE];
 
-    getProcStat(prevBuffer, CPU_STAT_BUFFER_SIZE);
+    // getProcStat(prevBuffer, CPU_STAT_BUFFER_SIZE);
 
-    sleep(1);
+    // sleep(1);
 
-    getProcStat(currentBuffer, CPU_STAT_BUFFER_SIZE);
+    // getProcStat(currentBuffer, CPU_STAT_BUFFER_SIZE);
 
     calcTotalCpuUsage(prevBuffer, currentBuffer);
     calcEveryCoreUsage(prevBuffer, currentBuffer);

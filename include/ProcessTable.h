@@ -4,11 +4,10 @@
 #include "Window.h"
 #include <ncurses.h>
 #include <vector>
-#include "core/process.h"
 
 class ProcessTable : public Window {
 public:
-    ProcessTable(WINDOW* parent, CpuStatistics& cpuStats);
+    ProcessTable(WINDOW* parent, SysStatistics& cpuStats);
     ~ProcessTable();
 
     void init() override;
@@ -34,7 +33,7 @@ private:
     int scrollOffset_;
     int scroll_offset;
     int selected_column;
-    CpuStatistics& cpuStats;
+    SysStatistics& cpuStats;
     bool showPopup = false;
     bool showAbout = false;
 };

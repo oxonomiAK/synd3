@@ -4,8 +4,8 @@
 #include <vector>
 #include "core/process.h"
 
-struct CpuStatistics {
-    float total, loadAvg[3], percore[32];
+struct SysStatistics {
+    float CPUtotal, loadAvg[3], CPUpercore[32], memTotal = 0, memUsed = 0;
     size_t runningTasks = 0, totalTasks = 0;
     double uptimeSeconds = 0.0;
 };

@@ -12,26 +12,18 @@ MainWindow::MainWindow(std::vector<Process> &processes)
       showOverlayWindow_(false),
       showAboutWindow_(false),
       processes(processes),
-      updateStatsThread(),
-      running(false),
-      mtx(),
-      cpu()
+      SysStat()
 {
-    cpu.total = 0.0f;
+    SysStat.CPUtotal = 0.0f;
     for (int i = 0; i < 32; ++i)
     {
-        cpu.percore[i] = 0.0f;
+        SysStat.CPUpercore[i] = 0.0f;
     }
 }
 
 MainWindow::~MainWindow()
 {
     shutdown();
-    running = false;
-    if (updateStatsThread.joinable())
-    {
-        updateStatsThread.join();
-    }
 }
 
 void MainWindow::init()
@@ -50,8 +42,8 @@ void MainWindow::init()
     keypad(mainWin_, TRUE);
     nodelay(mainWin_, TRUE);
 
-    leftPanel_ = new LeftPanel(mainWin_, cpu);
-    processTable_ = new ProcessTable(mainWin_, cpu);
+    leftPanel_ = new LeftPanel(mainWin_, SysStat);
+    processTable_ = new ProcessTable(mainWin_, SysStat);
     popupWindow_ = new PopupWindow(mainWin_, 10, 60, -1, -1, "", processes, true);
     aboutWindow_ = new AboutWindow(mainWin_);
 
@@ -77,21 +69,8 @@ void MainWindow::init()
     init_pair(CPU_TEXT_COLOR, COLOR_CYAN, COLOR_BLACK);
     init_pair(MEM_TEXT_COLOR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(FOOTER_COLOR, COLOR_CYAN, COLOR_BLACK);
-    running = true;
-    updateStatsThread = std::thread(&MainWindow::updateStatsLoop, this);
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
     wrefresh(mainWin_);
-}
-void MainWindow::updateStatsLoop()
-{
-    std::lock_guard<std::mutex> lock(mtx);
-    while (running)
-    {
-        getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));
-        getLoadavgData(cpu.loadAvg, &cpu.runningTasks, &cpu.totalTasks, sizeof(cpu.loadAvg), sizeof(cpu.runningTasks), sizeof(cpu.totalTasks));
-        getUptimeSeconds(&cpu.uptimeSeconds, sizeof(cpu.uptimeSeconds));
-        cpu.totalTasks++; // Increment total tasks to match the original logic
-    }
 }
 
 void MainWindow::render(const std::vector<Process> &processes)
@@ -145,7 +124,7 @@ void MainWindow::showAbout(size_t totalProcesses)
 
 bool MainWindow::handleInput(size_t totalProcesses)
 {
-    running.store(processTable_->handleInput(totalProcesses));
+    running = processTable_->handleInput(totalProcesses);
     showPopupWindow_ = processTable_->getShowPopup();
     showAboutWindow_ = processTable_->getShowAbout();
 
@@ -159,7 +138,11 @@ bool MainWindow::handleInput(size_t totalProcesses)
         showAbout(totalProcesses);
     }
 
-    return running.load();
+    return running;
+}
+SysStatistics& MainWindow::getSysStatisics()
+{
+    return SysStat;
 }
 
 int MainWindow::getSelectedColumn() const

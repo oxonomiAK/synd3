@@ -17,7 +17,7 @@ extern "C"
         size_t sReclaimable;
         size_t shmem;
         size_t cachedMem;
-        size_t memUsedInMB;
+        float memUsedInKB;
     } MemInfo;
 
     void MemTotal();
@@ -37,7 +37,7 @@ extern "C"
     void CachedMem();
     void getCachedMem(size_t *cachedMem, size_t cachedMemSize);
     void MemUsed();
-    void getMemUsedInMB(size_t *memUsed, size_t memUsedSize);
+    void getMemUsedInKB(float *memUsed, size_t memUsedSize);
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "core/mem_Info.h"
+#include "/home/arlive/glance/include/core/mem_Info.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -47,10 +47,10 @@ void getCachedMem(size_t *cachedMem, size_t cachedMemSize)
     CachedMem();
     memcpy(cachedMem, &meminfo.cachedMem, cachedMemSize);
 }
-void getMemUsedInMB(size_t *memUsed, size_t memUsedSize)
+void getMemUsedInKB(float *memUsed, size_t memUsedSize)
 {
     MemUsed();
-    memcpy(memUsed, &meminfo.memUsedInMB, memUsedSize);
+    memcpy(memUsed, &meminfo.memUsedInKB, memUsedSize);
 }
 void MemTotal()
 {
@@ -89,7 +89,8 @@ void MemFree()
 
 void MemTotalUsed()
 {
-    size_t MemTotal, MemFree;
+
+    size_t MemFree, MemTotal;
     getMemTotal(&MemTotal, sizeof(MemTotal));
     getMemFree(&MemFree, sizeof(MemFree));
     meminfo.memTotalUsed = MemTotal - MemFree;
@@ -180,5 +181,19 @@ void MemUsed()
     getMemTotalUsed(&memTotalUsed, sizeof(memTotalUsed));
     getBuffers(&buffers, sizeof(buffers));
     getCachedMem(&cachedMem, sizeof(cachedMem));
-    meminfo.memUsedInMB = (memTotalUsed - (buffers + cachedMem)) / 1024;
+    meminfo.memUsedInKB = (memTotalUsed - (buffers + cachedMem));
 }
+
+
+// int main(){
+//     size_t memTotal;
+//     float memUsedInKB;
+//     getMemTotal(&memTotal, sizeof(memTotal));
+//     getMemUsedInKB(&memUsedInKB, sizeof(memUsedInKB));
+//     float percentUsed = (float)memUsedInKB / (float)memTotal * 100.0f;
+
+//     printf("Total Memory: %zu KB\n", memTotal);
+//     printf("Used Memory: %.2f KB\n", memUsedInKB);
+//     printf("Memory Usage: %.2f%%\n", percentUsed);
+//     return 0;
+// }

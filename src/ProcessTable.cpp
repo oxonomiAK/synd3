@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <string.h>
 
-ProcessTable::ProcessTable(WINDOW* parent, CpuStatistics& cpuStats)
+ProcessTable::ProcessTable(WINDOW* parent, SysStatistics& cpuStats)
     : cpuStats(cpuStats)
 {
     int height, width;
@@ -22,19 +22,29 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     int max_y, max_x;
     getmaxyx(window_, max_y, max_x);
 
-    char totalCPUUsageBuffer[16];
+    char totalCPUUsageBuffer[32], totalMEMUsageBuffer[32];
     wattron(window_, COLOR_PAIR(HEADER_COLOR));
 
-    int widths[TOTAL_COLUMNS] = {8, 34, 10, 8};
+    int widths[TOTAL_COLUMNS] = {7, 34, 10, 11};
     const char* headers[TOTAL_COLUMNS] = {"PID", "NAME", "CPU", "MEM%"};
-    snprintf(totalCPUUsageBuffer, sizeof(totalCPUUsageBuffer), "CPU%% %.2f ", cpuStats.total);
+
+    float percentUsed = (cpuStats.memUsed / cpuStats.memTotal) * 100.0f;
+    snprintf(totalMEMUsageBuffer, sizeof(totalMEMUsageBuffer), "MEM%% %.2f", percentUsed);
+    snprintf(totalCPUUsageBuffer, sizeof(totalCPUUsageBuffer), "CPU%% %.2f", cpuStats.CPUtotal);
+
+    // Replace CPU and MEM headers with dynamic values
     headers[2] = totalCPUUsageBuffer;
+    headers[3] = totalMEMUsageBuffer;
 
-    int x = left_panel_width + 1;  // fixed start position, no shifting left
+    // Update widths for CPU and MEM headers
+    widths[2] = (int)strlen(totalCPUUsageBuffer);
+    widths[3] = (int)strlen(totalMEMUsageBuffer);
 
+    int x = left_panel_width + 1;
+
+    // Render headers with updated widths
     for (int i = 0; i < TOTAL_COLUMNS; i++) {
         int col_width = widths[i];
-        // Check if the column fits in window width
         if (x + col_width <= max_x) {
             if (i == selected_column) {
                 wattron(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
@@ -45,7 +55,6 @@ void ProcessTable::render(const std::vector<Process>& processes) {
             wattroff(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
             wattroff(window_, COLOR_PAIR(HEADER_COLOR));
         } else if (x < max_x) {
-            // Partial display if column does not fully fit
             int available_width = max_x - x;
             if (available_width > 0) {
                 char buffer[100];
@@ -59,9 +68,8 @@ void ProcessTable::render(const std::vector<Process>& processes) {
                 wattroff(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
                 wattroff(window_, COLOR_PAIR(HEADER_COLOR));
             }
-            // Do not print anything if no space left
         }
-        x += col_width + 2; // add spacing between columns
+        x += col_width + 2;
     }
     wattroff(window_, COLOR_PAIR(HEADER_COLOR));
 
@@ -78,12 +86,12 @@ void ProcessTable::render(const std::vector<Process>& processes) {
             wattron(window_, COLOR_PAIR(PROCESS_COLOR));
         }
 
-        x = left_panel_width + 1;  // fixed starting x for each row
+        x = left_panel_width + 1;
 
-        // Format PID and NAME fields
+        // Render PID and NAME as is, fixed width
         char pid_name_buffer[50];
-        snprintf(pid_name_buffer, sizeof(pid_name_buffer), "%-8d %-34.34s ", p.getPid(), p.getName().c_str());
-        int pid_name_len = 8 + 1 + 34 + 1; // total 44 chars including spaces
+        snprintf(pid_name_buffer, sizeof(pid_name_buffer), "%-8d %-34.34s", p.getPid(), p.getName().c_str());
+        int pid_name_len = 8 + 1 + 34; // total 43 chars
 
         if (x + pid_name_len <= max_x) {
             mvwprintw(window_, y, x, "%s", pid_name_buffer);
@@ -96,21 +104,21 @@ void ProcessTable::render(const std::vector<Process>& processes) {
             }
         }
 
-        x += 44;
+        x += pid_name_len + 1;
 
-        // CPU usage field
+        // CPU usage with percent sign, right aligned
         char cpu_buffer[32];
-        snprintf(cpu_buffer, sizeof(cpu_buffer), "%9.2f ", p.getCpuUsage());
-        int cpu_len = 10; // 9 for value + 1 for space
+        snprintf(cpu_buffer, sizeof(cpu_buffer), "%.2f", p.getCpuUsage());
+        int cpu_width = widths[2] - 1;
 
-        if (x + cpu_len <= max_x) {
+        if (x + cpu_width <= max_x) {
             wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
-            mvwprintw(window_, y, x, "%s", cpu_buffer);
+            mvwprintw(window_, y, x, "%*s", cpu_width, cpu_buffer);
             wattroff(window_, COLOR_PAIR(CPU_TEXT_COLOR));
         } else if (x < max_x) {
             int avail = max_x - x;
             if (avail > 0) {
-                char buf[10];
+                char buf[32];
                 snprintf(buf, sizeof(buf), "%.*s", avail, cpu_buffer);
                 wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
                 mvwprintw(window_, y, x, "%s", buf);
@@ -118,21 +126,21 @@ void ProcessTable::render(const std::vector<Process>& processes) {
             }
         }
 
-        x += cpu_len;
+        x += cpu_width + 2;
 
-        // Memory usage field
+        // Memory usage with percent sign, right aligned
         char mem_buffer[32];
-        snprintf(mem_buffer, sizeof(mem_buffer), "%10.2f", p.getMemUsage());
-        int mem_len = 11;
+        snprintf(mem_buffer, sizeof(mem_buffer), "%.2f", p.getMemUsage());
+        int mem_width = widths[3];
 
-        if (x + mem_len <= max_x) {
+        if (x + mem_width <= max_x) {
             wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
-            mvwprintw(window_, y, x, "%s", mem_buffer);
+            mvwprintw(window_, y, x, "%*s", mem_width, mem_buffer);
             wattroff(window_, COLOR_PAIR(MEM_TEXT_COLOR));
         } else if (x < max_x) {
             int avail = max_x - x;
             if (avail > 0) {
-                char buf[12];
+                char buf[32];
                 snprintf(buf, sizeof(buf), "%.*s", avail, mem_buffer);
                 wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
                 mvwprintw(window_, y, x, "%s", buf);
@@ -144,6 +152,7 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         wattroff(window_, COLOR_PAIR(PROCESS_COLOR));
     }
 
+    // Render footer as is
     wattron(window_, COLOR_PAIR(FOOTER_COLOR));
     const char* footer = " F1:Help  F9:Kill  F10:Quit ";
     int footer_len = static_cast<int>(strlen(footer));
@@ -152,6 +161,8 @@ void ProcessTable::render(const std::vector<Process>& processes) {
 
     wrefresh(window_);
 }
+
+
 
 
 bool ProcessTable::handleInput(size_t totalProcesses) {
@@ -170,14 +181,6 @@ int ch = getch();
         case KEY_RIGHT:
             selected_column = (selected_column + 1) % TOTAL_COLUMNS;
             break;
-        case KEY_PPAGE:
-            selectedProcess_ = std::max(0, selectedProcess_ - 10);
-            break;
-        case KEY_NPAGE:
-            selectedProcess_ = std::min((int)totalProcesses - 1, selectedProcess_ + 10);
-            break;
-        case 'q':
-            return false;
         case KEY_F(10):
             return false;
         case KEY_F(9):

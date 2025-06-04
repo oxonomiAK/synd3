@@ -11,7 +11,7 @@
 
 class LeftPanel : public Window {
 public:
-    LeftPanel(WINDOW* parent, CpuStatistics& cpuStats);
+    LeftPanel(WINDOW* parent, SysStatistics& cpuStats);
     ~LeftPanel();
 
     void init() override;
@@ -21,7 +21,7 @@ public:
 
 private:
     WINDOW* window_;
-    CpuStatistics& cpuStats;
+    SysStatistics& cpuStats;
     char cpuName[64];
 };
 
