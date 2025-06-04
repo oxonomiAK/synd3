@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "/home/arlive/glance/include/core/mem_Info.h"
+#include "core/mem_Info.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -183,17 +183,3 @@ void MemUsed()
     getCachedMem(&cachedMem, sizeof(cachedMem));
     meminfo.memUsedInKB = (memTotalUsed - (buffers + cachedMem));
 }
-
-
-// int main(){
-//     size_t memTotal;
-//     float memUsedInKB;
-//     getMemTotal(&memTotal, sizeof(memTotal));
-//     getMemUsedInKB(&memUsedInKB, sizeof(memUsedInKB));
-//     float percentUsed = (float)memUsedInKB / (float)memTotal * 100.0f;
-
-//     printf("Total Memory: %zu KB\n", memTotal);
-//     printf("Used Memory: %.2f KB\n", memUsedInKB);
-//     printf("Memory Usage: %.2f%%\n", percentUsed);
-//     return 0;
-// }
