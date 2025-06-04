@@ -12,11 +12,13 @@ extern "C"
     {
         float loadAvg[3];
         size_t runningTasks;
+        size_t totalTasks;
         char cpuName[128];
         float totalUsage;
         float perCore[32];
         size_t coreCount;
         size_t threadCount;
+        double uptimeSeconds;
     } CpuStats;
 
     int get_cpu_stats(CpuStats *out); // neutral func
@@ -34,9 +36,11 @@ extern "C"
     void getProcStat(char *buffer, const int size);
     void calcTotalCpuUsage(char *prevBuffer, char *currentBuffer);
     void getTotalCpuUsage();
-    void getLoadavgAndRunningTasks(float *loadAvg, size_t *ruinningTasks, size_t loadAvgSize, size_t runningTasksSize);
+    void getLoadavgData(float *loadAvg, size_t *ruinningTasks, size_t *totalTasks, size_t loadAvgSize, size_t runningTasksSize, size_t totalTasksSize);
     unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
-    void LoadAvgAndRunningTasks();
+    void LoadAvgData();
+    void getUptimeSeconds(double *uptimeSeconds, size_t uptimeSecondsSize);\
+    void UptimeSeconds();
 #ifdef __cplusplus
 }
 #endif

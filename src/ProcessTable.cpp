@@ -1,5 +1,6 @@
 #include "ProcessTable.h"
 #include <algorithm>
+#include <string.h>
 
 ProcessTable::ProcessTable(WINDOW* parent, CpuStatistics& cpuStats)
     : cpuStats(cpuStats)
@@ -18,7 +19,6 @@ void ProcessTable::init() {
 }
 
 void ProcessTable::render(const std::vector<Process>& processes) {
-    const int left_panel_width = 30;  // fixed left offset for left panel
     int max_y, max_x;
     getmaxyx(window_, max_y, max_x);
 
@@ -99,9 +99,9 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         x += 44;
 
         // CPU usage field
-        char cpu_buffer[10];
-        snprintf(cpu_buffer, sizeof(cpu_buffer), "%5.1f ", p.getCpuUsage());
-        int cpu_len = 6;
+        char cpu_buffer[32];
+        snprintf(cpu_buffer, sizeof(cpu_buffer), "%9.2f ", p.getCpuUsage());
+        int cpu_len = 10; // 9 for value + 1 for space
 
         if (x + cpu_len <= max_x) {
             wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
@@ -121,8 +121,8 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         x += cpu_len;
 
         // Memory usage field
-        char mem_buffer[12];
-        snprintf(mem_buffer, sizeof(mem_buffer), "%11.1f", p.getMemUsage());
+        char mem_buffer[32];
+        snprintf(mem_buffer, sizeof(mem_buffer), "%10.2f", p.getMemUsage());
         int mem_len = 11;
 
         if (x + mem_len <= max_x) {
@@ -145,7 +145,9 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     }
 
     wattron(window_, COLOR_PAIR(FOOTER_COLOR));
-    mvwprintw(window_, max_y - 1, 0, " F1:Help  F8:Kill  F9:Quit ");
+    const char* footer = " F1:Help  F9:Kill  F10:Quit ";
+    int footer_len = static_cast<int>(strlen(footer));
+    mvwprintw(window_, max_y - 1, max_x - footer_len, "%s", footer);
     wattroff(window_, COLOR_PAIR(FOOTER_COLOR));
 
     wrefresh(window_);
@@ -176,9 +178,9 @@ int ch = getch();
             break;
         case 'q':
             return false;
-        case KEY_F(9):
+        case KEY_F(10):
             return false;
-        case KEY_F(8):
+        case KEY_F(9):
             showPopup = true; 
             break;
         case KEY_F(1):

@@ -1,8 +1,7 @@
 #include "LeftPanel.h"
 #include <ctime>
+#include <cstring>
 #include "core/cpu_Stats.h"
-
-
 
 static time_t start_time = time(nullptr);
 
@@ -10,6 +9,7 @@ LeftPanel::LeftPanel(WINDOW* parent, CpuStatistics& cpuStats) : cpuStats(cpuStat
     int height, width;
     getmaxyx(parent, height, width);
     window_ = derwin(parent, height, width, 0, 0);
+    getCpuName(cpuName, sizeof(cpuName));
 }
 
 LeftPanel::~LeftPanel() {
@@ -21,7 +21,6 @@ void LeftPanel::init() {
 }
 
 void LeftPanel::render(const std::vector<Process>& processes) {
-    const int panel_width = 30;  // fixed width for left panel
     int max_y, max_x;
     getmaxyx(window_, max_y, max_x);
 
@@ -29,71 +28,109 @@ void LeftPanel::render(const std::vector<Process>& processes) {
     getThreadCount(&corecount, sizeof(corecount));
 
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    // Draw vertical separator line at panel_width
+    // Draw vertical separator line at left_panel_width
     for (int y = 1; y < max_y - 1; y++) {
-        mvwaddch(window_, y, panel_width, ACS_VLINE);
+        mvwaddch(window_, y, left_panel_width, ACS_VLINE);
     }
 
+    int line = 1;
+    bool first_line = true;
+    // Title
     wattron(window_, COLOR_PAIR(TITLE_COLOR));
-    mvwprintw(window_, 1, 1, " System Information ");
+    mvwprintw(window_, line++, 1, " System Information ");
     wattroff(window_, COLOR_PAIR(TITLE_COLOR));
-
-    // Memory Usage bar at fixed position near the top
+    line++;
+    // CPU name (wrap to next line if too long)
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, 3, 2, "Memory Usage:");
+    int name_max_width = left_panel_width - 4;
+    char* token = cpuName;
+    while (*token) {
+        char buffer[128] = {};
+        int len = std::min((int)strlen(token), name_max_width);
+        strncpy(buffer, token, len);
+        buffer[len] = '\0';
 
-    int mem_bar_width = panel_width - 4 - 12; // 12 for labels and spacing
-    float mem_percent = 70.0f; // example placeholder value
-    int mem_bars = (int)(mem_bar_width * mem_percent / 100.0f);
+        // Cut only at space if possible
+        for (int i = len - 1; i > 0; --i) {
+            if (buffer[i] == ' ') {
+                buffer[i] = '\0';
+                len = i;
+                break;
+            }
+        }
+        if (first_line) {
+            mvwprintw(window_, line++, 2, "CPU: %s", buffer);
+            first_line = false;
+        } else {
+            mvwprintw(window_, line++, 7, "%s", buffer); 
+        }
+
+        token += len;
+        while (*token == ' ') token++; // skip spaces
+    }
+    line++; // add extra line after CPU name
+    // Memory Usage
+    mvwprintw(window_, line++, 2, "Memory Usage:");
+    int mem_bar_width = left_panel_width - 4 - 12;
+    float mem_percent = 70.0f; // example
+    int mem_bars = static_cast<int>(mem_bar_width * mem_percent / 100.0f);
+
     wattron(window_, COLOR_PAIR(MEM_BAR_COLOR));
-    mvwprintw(window_, 4, 2, "[");
+    mvwprintw(window_, line, 2, "[");
     for (int i = 0; i < mem_bar_width; i++) {
         waddch(window_, i < mem_bars ? ACS_CKBOARD : ' ');
     }
     wprintw(window_, "]");
     wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
     wprintw(window_, " %2.0f%% of 16G", mem_percent);
+    line+= 2;
 
-    // CPU per-core usage - clipped if not enough space at bottom
+    // Per-core CPU usage
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, 6, 1, " Per core usage: ");
+    mvwprintw(window_, line++, 1, " Per core usage: ");
 
-    // Calculate how many lines are available for core bars without overlapping bottom system info
-    int system_info_lines = 5;  // number of lines reserved at bottom for uptime etc.
-    int available_lines_for_cpu = max_y - 7 - system_info_lines; 
-    int cores_to_show = std::min((int)corecount, available_lines_for_cpu);
+    int system_info_lines = 5;
+    int available_lines_for_cpu = max_y - line - system_info_lines;
+    int width_for_cpu = left_panel_width - 17;
+    int cores_to_show = std::min(static_cast<int>(corecount), available_lines_for_cpu);
 
     for (int i = 0; i < cores_to_show; i++) {
         float usage = cpuStats.percore[i];
         wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
-        mvwprintw(window_, 7 + i, 2, "CPU%-2d:", i);
+        mvwprintw(window_, line, 2, "CPU%-2d:", i);
         wattron(window_, COLOR_PAIR(CPU_BAR_COLOR));
         wprintw(window_, " [");
-        int bars = (int)(usage / 10);
-        for (int j = 0; j < 10; j++) {
+        int bars = static_cast<int>(usage * width_for_cpu / 100.0f);
+        for (int j = 0; j < width_for_cpu; j++) {
             waddch(window_, j < bars ? ACS_CKBOARD : ' ');
         }
         wprintw(window_, "] ");
         wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
         wprintw(window_, "%2.1f%%", usage);
+        line++;
     }
+    
+    // System info at the bottom
+   
+    int total_seconds = static_cast<int>(cpuStats.uptimeSeconds);
 
-    // System information at the bottom (fixed position)
-    time_t now = time(nullptr);
-    int uptime = (int)difftime(now, start_time);
+    int days = total_seconds / 86400;
+    int hours = (total_seconds % 86400) / 3600;
+    int minutes = (total_seconds % 3600) / 60;
+    int seconds = total_seconds % 60;
+    
     wattron(window_, COLOR_PAIR(TEXT_COLOR));
-    mvwprintw(window_, max_y - 5, 2, "Uptime: %02d:%02d:%02d",
-             uptime / 3600, (uptime % 3600) / 60, uptime % 60);
+    mvwprintw(window_, max_y - 5, 2, "Uptime: %d days %02d:%02d:%02d",
+          days, hours, minutes, seconds);
     mvwprintw(window_, max_y - 4, 2, "Tasks: %ld, %ld running", processes.size(), cpuStats.runningTasks);
-    mvwprintw(window_, max_y - 3, 2, "Load avg: %.2f %.2f %.2f", cpuStats.loadAvg[0], cpuStats.loadAvg[1], cpuStats.loadAvg[2]);
+    mvwprintw(window_, max_y - 3, 2, "Load avg: %.2f %.2f %.2f",
+              cpuStats.loadAvg[0], cpuStats.loadAvg[1], cpuStats.loadAvg[2]);
 }
 
 bool LeftPanel::handleInput(size_t /*totalProcesses*/) {
-    // Nothing to handle for now
-
     return true;
 }
 
 void LeftPanel::shutdown() {
-    
+    // No shutdown logic for now
 }

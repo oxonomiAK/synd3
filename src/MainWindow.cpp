@@ -4,9 +4,20 @@
 
 
 MainWindow::MainWindow(std::vector<Process> &processes)
-    : leftPanel_(nullptr), processTable_(nullptr),
-      mainWin_(nullptr), showPopupWindow_(false),
-      showOverlayWindow_(false), processes(processes)
+    : mainWin_(nullptr),
+      leftPanel_(nullptr),
+      processTable_(nullptr),
+      popupWindow_(nullptr),
+      aboutWindow_(nullptr),
+      windows_(),
+      showPopupWindow_(false),
+      showOverlayWindow_(false),
+      showAboutWindow_(false),
+      processes(processes),
+      updateStatsThread(),
+      running(false),
+      mtx(),
+      cpu()
 {
     cpu.total = 0.0f;
     for (int i = 0; i < 32; ++i) {
@@ -38,18 +49,20 @@ void MainWindow::init() {
     keypad(mainWin_, TRUE);
     nodelay(mainWin_, TRUE);
 
+
     leftPanel_ = new LeftPanel(mainWin_, cpu);
-    leftPanel_->init();
-
     processTable_ = new ProcessTable(mainWin_, cpu);
-    processTable_->init();
-
-    popupWindow_ = new PopupWindow(mainWin_, 10, 60, -1, -1, "");
-    popupWindow_->init();
-    showPopupWindow_ = false;
-
+    popupWindow_ = new PopupWindow(mainWin_, 10, 60, -1, -1, "", processes, true);
     aboutWindow_ = new AboutWindow(mainWin_);
-    aboutWindow_->init();
+
+
+    windows_.push_back(leftPanel_);
+    windows_.push_back(processTable_);
+    windows_.push_back(popupWindow_);
+    windows_.push_back(aboutWindow_);
+
+    for (auto* win : windows_) win->init();
+    showPopupWindow_ = false;
     showAboutWindow_ = false;
 
     // Initialize color pairs here or in main
@@ -60,7 +73,7 @@ void MainWindow::init() {
     init_pair(CPU_BAR_COLOR, COLOR_BLACK, COLOR_GREEN);
     init_pair(MEM_BAR_COLOR, COLOR_BLACK, COLOR_MAGENTA);
     init_pair(TEXT_COLOR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(HIGHLIGHT_COLOR, COLOR_YELLOW, COLOR_BLUE);
+    init_pair(HIGHLIGHT_COLOR, 15, COLOR_BLUE);
     init_pair(CPU_TEXT_COLOR, COLOR_CYAN, COLOR_BLACK);
     init_pair(MEM_TEXT_COLOR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(FOOTER_COLOR, COLOR_CYAN, COLOR_BLACK); 
@@ -73,7 +86,9 @@ void MainWindow::updateStatsLoop() {
     std::lock_guard<std::mutex> lock(mtx);
     while (running) {
         getCpuStats(&cpu.total, cpu.percore, sizeof(cpu.total), sizeof(cpu.percore));    
-        getLoadavgAndRunningTasks(cpu.loadAvg, &cpu.runningTasks, sizeof(cpu.loadAvg), sizeof(cpu.runningTasks));
+        getLoadavgData(cpu.loadAvg, &cpu.runningTasks, &cpu.totalTasks, sizeof(cpu.loadAvg), sizeof(cpu.runningTasks), sizeof(cpu.totalTasks));
+        getUptimeSeconds(&cpu.uptimeSeconds, sizeof(cpu.uptimeSeconds));
+        cpu.totalTasks++; // Increment total tasks to match the original logic
     }
 }
 
@@ -83,15 +98,13 @@ void MainWindow::render(const std::vector<Process>& processes) {
     box(mainWin_, 0, 0);
 
 
-    leftPanel_->render(processes);
-    processTable_->render(processes);
 
-    if (showPopupWindow_) {
-        popupWindow_->render(processes);
- 
-    }
-    if (showAboutWindow_) {
-        aboutWindow_->render(processes);
+
+    for (auto* win : windows_) {
+
+        if (win == popupWindow_ && !showPopupWindow_) continue;
+        if (win == aboutWindow_ && !showAboutWindow_) continue;
+        win->render(processes);
     }
 
 
@@ -153,20 +166,23 @@ void MainWindow::setSelectedColumn(int col) {
 }
 
 void MainWindow::shutdown() {
-    if (leftPanel_) {
-        leftPanel_->shutdown();
-        delete leftPanel_;
-        leftPanel_ = nullptr;
+    for (auto* win : windows_) {
+        if (win) {
+            win->shutdown();
+        }
     }
-    if (processTable_) {
-        processTable_->shutdown();
-        delete processTable_;
-        processTable_ = nullptr;
+    for (auto* win : windows_) {
+        delete win;
     }
+    windows_.clear();
     if (mainWin_) {
         delwin(mainWin_);
         mainWin_ = nullptr;
     }
+    leftPanel_ = nullptr;
+    processTable_ = nullptr;
+    popupWindow_ = nullptr;
+    aboutWindow_ = nullptr;
 }
 
 bool MainWindow::getShowPopupWindow() const {

@@ -145,13 +145,18 @@ void getThreadCount(size_t *threadCount, size_t threadCountSize)
     ThreadCount();
     memcpy(threadCount, &cpustats.threadCount, threadCountSize);
 }
-void getLoadavgAndRunningTasks(float *loadAvg, size_t *ruinningTasks, size_t loadAvgSize, size_t runningTasksSize)
+ void getLoadavgData(float *loadAvg, size_t *ruinningTasks, size_t *totalTasks, size_t loadAvgSize, size_t runningTasksSize, size_t totalTasksSize)
 {
-    LoadAvgAndRunningTasks();
+    LoadAvgData();
     memcpy(loadAvg, &cpustats.loadAvg, loadAvgSize);
     memcpy(ruinningTasks, &cpustats.runningTasks, runningTasksSize);
+    memcpy(totalTasks, &cpustats.totalTasks, totalTasksSize);
 }
-
+void getUptimeSeconds(double *uptimeSeconds, size_t uptimeSecondsSize)
+{
+    UptimeSeconds();
+    memcpy(uptimeSeconds, &cpustats.uptimeSeconds, uptimeSecondsSize);
+}
 void CoreCount()
 {
     FILE *file = fopen("/proc/cpuinfo", "r");
@@ -179,17 +184,41 @@ void CpuName()
         perror("Could not open file");
         return;
     }
+
     for (size_t i = 0; i <= 4; i++)
     {
         fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
     }
+
+    char *newline = strchr(buffer, '\n');
+    if (newline)
+        *newline = '\0';
+
     char *cpuName = buffer + 13;
 
-    strncpy(cpustats.cpuName, cpuName, sizeof(cpustats.cpuName));
+    strncpy(cpustats.cpuName, cpuName, sizeof(cpustats.cpuName) - 1);
+
     fclose(file);
 }
 
-void LoadAvgAndRunningTasks()
+void UptimeSeconds()
+{
+    FILE* file = fopen("/proc/uptime", "r");
+    char buffer[CPU_STAT_BUFFER_SIZE];
+    if (file == NULL)
+    {
+        perror("Could not open /proc/uptime");
+        return;
+    }
+
+    fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
+
+    sscanf(buffer, "%lf", &cpustats.uptimeSeconds);
+
+    fclose(file);
+}
+
+void LoadAvgData()
 {
     FILE *file = fopen("/proc/loadavg", "r");
     if (file == NULL)
@@ -201,7 +230,7 @@ void LoadAvgAndRunningTasks()
     fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
     fclose(file);
 
-   sscanf(buffer, "%f %f %f %ld/%*d %*d", &cpustats.loadAvg[0], &cpustats.loadAvg[1], &cpustats.loadAvg[2], &cpustats.runningTasks);
+   sscanf(buffer, "%f %f %f %ld/%ld %*d", &cpustats.loadAvg[0], &cpustats.loadAvg[1], &cpustats.loadAvg[2], &cpustats.runningTasks, &cpustats.totalTasks);
 }
 void ThreadCount()
 {
