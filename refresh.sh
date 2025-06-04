@@ -1,5 +1,5 @@
 #!/bin/bash
 make clean
 make
-./glance
+./synd3
 #!/bin/bash

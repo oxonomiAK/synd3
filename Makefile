@@ -8,9 +8,9 @@ SRC_CPP=$(shell find src -name '*.cpp')
 OBJ_C=$(SRC_C:.c=.o)
 OBJ_CPP=$(SRC_CPP:.cpp=.o)
 
-all: glance
+all: synd3
 
-glance: $(OBJ_C) $(OBJ_CPP)
+synd3: $(OBJ_C) $(OBJ_CPP)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
@@ -21,4 +21,4 @@ glance: $(OBJ_C) $(OBJ_CPP)
 
 clean:
 	find src -name '*.o' -delete
-	rm -f glance
+	rm -f synd3

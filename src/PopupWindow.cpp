@@ -91,6 +91,7 @@ void PopupWindow::killProcess() {
                                                        "",
                                                        processes, false); 
             errorWindow->show("Permission denied to kill process: ");
+            errorWindow->setSelectedProcess(selectedProcess_);
             errorWindow->render(processes);
             wgetch(errorWindow->win_); 
             delete errorWindow;
