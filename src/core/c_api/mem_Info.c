@@ -58,7 +58,7 @@ void MemTotal()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
 
@@ -75,7 +75,7 @@ void MemFree()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 1; i++)
@@ -101,7 +101,7 @@ void Buffers()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 3; i++)
@@ -119,7 +119,7 @@ void Cached()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 4; i++)
@@ -137,7 +137,7 @@ void SReclaimable()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 23; i++)
@@ -155,7 +155,7 @@ void Shmem()
     char buffer[MEM_INFO_BUFFER_SIZE];
     if (file == NULL)
     {
-        perror("Could not open file");
+        // perror("Could not open file");
         return;
     }
     for (size_t i = 0; i <= 20; i++)

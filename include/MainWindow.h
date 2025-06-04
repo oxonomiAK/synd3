@@ -33,21 +33,23 @@ public:
 private:
     void showAbout(size_t totalProcesses);
     void showPopup(size_t totalProcesses);
-    LeftPanel* leftPanel_;
-    ProcessTable* processTable_;
-    WINDOW* mainWin_;
-    PopupWindow* popupWindow_;
-    AboutWindow* aboutWindow_;
 
-    bool showPopupWindow_;
-    bool showOverlayWindow_;
-    bool showAboutWindow_;
+    WINDOW* mainWin_ = nullptr;
+    LeftPanel* leftPanel_ = nullptr;
+    ProcessTable* processTable_ = nullptr;
+    PopupWindow* popupWindow_ = nullptr;
+    AboutWindow* aboutWindow_ = nullptr;
+
+    std::vector<Window*> windows_;
+
+    bool showPopupWindow_ = false;
+    bool showOverlayWindow_ = false;
+    bool showAboutWindow_ = false;
     std::vector<Process> &processes;
     std::thread updateStatsThread;
     void updateStatsLoop();         
     std::atomic<bool> running;
     std::mutex mtx;
-    // int sortColumn_;
     CpuStatistics cpu;
 };
 

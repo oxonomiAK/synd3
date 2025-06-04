@@ -2,7 +2,10 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
-
+#include <csignal>
+#include <cerrno>     // errno
+#include <cstring>    // strerror
+#include <iostream>
 // Helper function to draw wrapped text inside the window
 static void drawWrappedText(WINDOW* win, int starty, int startx, const std::string& text, int maxWidth) {
     size_t pos = 0;
@@ -15,10 +18,11 @@ static void drawWrappedText(WINDOW* win, int starty, int startx, const std::stri
     }
 }
 
-PopupWindow::PopupWindow(WINDOW* parent, int height, int width, int starty, int startx, std::string message)
-    : visible_(false), message_(std::move(message)), parent_(parent), win_(nullptr),
+PopupWindow::PopupWindow(WINDOW* parent, int height, int width, int starty, int startx,
+                         std::string message, std::vector<Process>& processes, bool showConfirmation)
+    : processes(processes), showConfirmation_(showConfirmation), visible_(false), message_(std::move(message)), parent_(parent), win_(nullptr),
       desiredHeight_(height), desiredWidth_(width),
-      startY_(starty), startX_(startx) 
+      startY_(starty), startX_(startx)
 {
     // If negative start positions provided, center the window on the parent
     if (startY_ < 0 || startX_ < 0) {
@@ -64,13 +68,36 @@ void PopupWindow::render(const std::vector<Process>& processes) {
 
     mvwprintw(win_, 3, 2, "PID: %d", processes[selectedProcess_].getPid());
 
+    currentName = processes[selectedProcess_].getName();
     std::string nameLine = "Name: " + processes[selectedProcess_].getName();
     drawWrappedText(win_, 4, 2, nameLine, desiredWidth_ - 4);
 
-    mvwprintw(win_, desiredHeight_ - 2, 4, "[Y] Yes");
-    mvwprintw(win_, desiredHeight_ - 2, desiredWidth_ - 10, "[N] No");
+    if (showConfirmation_) {
+        mvwprintw(win_, desiredHeight_ - 2, 4, "[Y] Yes");
+        mvwprintw(win_, desiredHeight_ - 2, desiredWidth_ - 10, "[N] No");
+    }
 
     wrefresh(win_);
+}
+void PopupWindow::killProcess() {
+
+    if (kill(processes[selectedProcess_].getPid(), SIGTERM) == 0) {
+
+        return;
+    } else {
+        int err = errno;
+        if (err == EPERM) {
+            PopupWindow* errorWindow = new PopupWindow(parent_, 7, 50, -1, -1,
+                                                       "",
+                                                       processes, false); 
+            errorWindow->show("Permission denied to kill process: ");
+            errorWindow->render(processes);
+            wgetch(errorWindow->win_); 
+            delete errorWindow;
+
+        return;
+        }
+    }
 }
 
 bool PopupWindow::handleInput(size_t /*totalProcesses*/) {
@@ -81,6 +108,7 @@ bool PopupWindow::handleInput(size_t /*totalProcesses*/) {
             case 'y':
             case 'Y':
                 confirmed = true;
+                killProcess();
                 hide();
                 return false; // Close popup window
             case 'n':

@@ -5,7 +5,9 @@
 #include "core/process.h"
 
 struct CpuStatistics {
-    float total, percore[32];
+    float total, loadAvg[3], percore[32];
+    size_t runningTasks = 0, totalTasks = 0;
+    double uptimeSeconds = 0.0;
 };
 
 class Window {
@@ -16,6 +18,7 @@ public:
     virtual bool handleInput(size_t totalProcesses) = 0;
     virtual void shutdown() = 0;
 protected:
+    const int left_panel_width =35; // fixed left offset for left panel
     enum Colors {
         TITLE_COLOR,
         HEADER_COLOR,

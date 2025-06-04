@@ -14,8 +14,9 @@ extern "C"
     {
         int pid;
         char name[256];
-        float cpu_usage;
+        // float cpu_usage;
         float mem_usage;
+        unsigned long long process_ticks;
     } ProcessInfo;
 
     size_t get_process_list(ProcessInfo *buffer, size_t max);

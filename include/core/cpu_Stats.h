@@ -10,11 +10,15 @@ extern "C"
 #include <stddef.h> // size_t
     typedef struct
     {
+        float loadAvg[3];
+        size_t runningTasks;
+        size_t totalTasks;
         char cpuName[128];
         float totalUsage;
         float perCore[32];
         size_t coreCount;
         size_t threadCount;
+        double uptimeSeconds;
     } CpuStats;
 
     int get_cpu_stats(CpuStats *out); // neutral func
@@ -29,8 +33,12 @@ extern "C"
     void getCpuName(char *cpuName, size_t cpuNameSize);
     void ThreadCount();
     void getThreadCount(size_t *threadCount, size_t threadCountSize);
+    void getLoadavgData(float *loadAvg, size_t *ruinningTasks, size_t *totalTasks, size_t loadAvgSize, size_t runningTasksSize, size_t totalTasksSize);
     unsigned long long calcTotalCpuTck(char *prevBuffer, char *currentBuffer);
-
+    unsigned long long getTotalCpuTicks();
+    void LoadAvgData();
+    void getUptimeSeconds(double *uptimeSeconds, size_t uptimeSecondsSize);
+    void UptimeSeconds();
 #ifdef __cplusplus
 }
 #endif
