@@ -13,8 +13,8 @@ AboutWindow::AboutWindow(WINDOW *parent) : visible_(false), scrollOffset_(0)
 
         KEYBOARD SHORTCUTS:
           F1 - Open this help screen
-          F8 - Kill selected process (confirmation required)
-          F9 - Exit program safely
+          F9 - Kill selected process (confirmation required)
+          F10 - Exit program safely
 
         PROCESS TABLE:
           - Shows list of active processes
@@ -29,11 +29,11 @@ AboutWindow::AboutWindow(WINDOW *parent) : visible_(false), scrollOffset_(0)
 
         HOW TO KILL A PROCESS:
           1. Use arrow keys to select the process
-          2. Press F8
+          2. Press F9
           3. Confirm with 'Y' or cancel with 'N'
 
         EXITING THE PROGRAM:
-          - Press F9 or Ctrl+C to exit
+          - Press F10 or Ctrl+C to exit
           - Resources are released safely
           - Terminal is restored to its original state
 
