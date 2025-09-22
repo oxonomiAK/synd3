@@ -3,14 +3,17 @@
 #include <string>
 #include <vector>
 #include <csignal>
-#include <cerrno>     // errno
-#include <cstring>    // strerror
+#include <cerrno>  // errno
+#include <cstring> // strerror
 #include <iostream>
+
 // Helper function to draw wrapped text inside the window
-static void drawWrappedText(WINDOW* win, int starty, int startx, const std::string& text, int maxWidth) {
+static void drawWrappedText(WINDOW *win, int starty, int startx, const std::string &text, int maxWidth)
+{
     size_t pos = 0;
     int line = 0;
-    while (pos < text.length()) {
+    while (pos < text.length())
+    {
         std::string lineText = text.substr(pos, maxWidth);
         mvwprintw(win, starty + line, startx, "%s", lineText.c_str());
         pos += maxWidth;
@@ -18,32 +21,39 @@ static void drawWrappedText(WINDOW* win, int starty, int startx, const std::stri
     }
 }
 
-PopupWindow::PopupWindow(WINDOW* parent, int height, int width, int starty, int startx,
-                         std::string message, std::vector<Process>& processes, bool showConfirmation)
+PopupWindow::PopupWindow(WINDOW *parent, int height, int width, int starty, int startx,
+                         std::string message, std::vector<Process> &processes, bool showConfirmation)
     : processes(processes), showConfirmation_(showConfirmation), visible_(false), message_(std::move(message)), parent_(parent), win_(nullptr),
       desiredHeight_(height), desiredWidth_(width),
       startY_(starty), startX_(startx)
 {
     // If negative start positions provided, center the window on the parent
-    if (startY_ < 0 || startX_ < 0) {
+    if (startY_ < 0 || startX_ < 0)
+    {
         int max_y, max_x;
         getmaxyx(parent_, max_y, max_x);
-        if (startY_ < 0) startY_ = (max_y - desiredHeight_) / 2;
-        if (startX_ < 0) startX_ = (max_x - desiredWidth_) / 2;
+        if (startY_ < 0)
+            startY_ = (max_y - desiredHeight_) / 2;
+        if (startX_ < 0)
+            startX_ = (max_x - desiredWidth_) / 2;
     }
     // Create the derived window initially
     win_ = derwin(parent_, desiredHeight_, desiredWidth_, startY_, startX_);
 }
 
-PopupWindow::~PopupWindow() {
-    if (win_) {
+PopupWindow::~PopupWindow()
+{
+    if (win_)
+    {
         delwin(win_);
         win_ = nullptr;
     }
 }
 
-void PopupWindow::render(const std::vector<Process>& processes) {
-    if (!visible_) return;
+void PopupWindow::render(const std::vector<Process> &processes)
+{
+    if (!visible_)
+        return;
 
     int max_y, max_x;
     getmaxyx(parent_, max_y, max_x);
@@ -53,7 +63,8 @@ void PopupWindow::render(const std::vector<Process>& processes) {
     int new_startx = (max_x - desiredWidth_) / 2;
 
     // Delete old window before recreating with updated position and size
-    if (win_) {
+    if (win_)
+    {
         delwin(win_);
         win_ = nullptr;
     }
@@ -72,90 +83,108 @@ void PopupWindow::render(const std::vector<Process>& processes) {
     std::string nameLine = "Name: " + processes[selectedProcess_].getName();
     drawWrappedText(win_, 4, 2, nameLine, desiredWidth_ - 4);
 
-    if (showConfirmation_) {
+    if (showConfirmation_)
+    {
         mvwprintw(win_, desiredHeight_ - 2, 4, "[Y] Yes");
         mvwprintw(win_, desiredHeight_ - 2, desiredWidth_ - 10, "[N] No");
     }
 
     wrefresh(win_);
 }
-void PopupWindow::killProcess() {
+void PopupWindow::killProcess()
+{
 
-    if (kill(processes[selectedProcess_].getPid(), SIGTERM) == 0) {
+    if (kill(processes[selectedProcess_].getPid(), SIGTERM) == 0)
+    {
 
         return;
-    } else {
+    }
+    else
+    {
         int err = errno;
-        if (err == EPERM) {
-            PopupWindow* errorWindow = new PopupWindow(parent_, 7, 50, -1, -1,
+        if (err == EPERM)
+        {
+            PopupWindow *errorWindow = new PopupWindow(parent_, 7, 50, -1, -1,
                                                        "",
-                                                       processes, false); 
+                                                       processes, false);
             errorWindow->show("Permission denied to kill process: ");
             errorWindow->setSelectedProcess(selectedProcess_);
             errorWindow->render(processes);
-            wgetch(errorWindow->win_); 
+            wgetch(errorWindow->win_);
             delete errorWindow;
 
-        return;
+            return;
         }
     }
 }
 
-bool PopupWindow::handleInput(size_t /*totalProcesses*/) {
+bool PopupWindow::handleInput(size_t /*totalProcesses*/)
+{
     bool confirmed = false;
-    while (!confirmed) {
+    while (!confirmed)
+    {
         int ch = wgetch(win_);
-        switch (ch) {
-            case 'y':
-            case 'Y':
-                confirmed = true;
-                killProcess();
-                hide();
-                return false; // Close popup window
-            case 'n':
-            case 'N':
-                confirmed = true;
-                hide();
-                return false; // Close popup window
-            default:
-                continue;
+        switch (ch)
+        {
+        case 'y':
+        case 'Y':
+            confirmed = true;
+            killProcess();
+            hide();
+            return false; // Close popup window
+        case 'n':
+        case 'N':
+            confirmed = true;
+            hide();
+            return false; // Close popup window
+        default:
+            continue;
         }
     }
     return false;
 }
 
-void PopupWindow::show(const std::string& message) {
+void PopupWindow::show(const std::string &message)
+{
     message_ = message;
     visible_ = true;
 }
 
-void PopupWindow::hide() {
+void PopupWindow::hide()
+{
     visible_ = false;
-    if (win_) {
+    if (win_)
+    {
         werase(win_);
         wrefresh(win_);
     }
 }
 
-void PopupWindow::shutdown() {
-    if (win_) {
+void PopupWindow::shutdown()
+{
+    if (win_)
+    {
         delwin(win_);
         win_ = nullptr;
     }
 }
 
-void PopupWindow::init() {
+void PopupWindow::init()
+{
     // Optional initialization code
 }
 
-bool PopupWindow::isVisible() const {
+bool PopupWindow::isVisible() const
+{
     return visible_;
 }
 
-void PopupWindow::setSelectedProcess(int idx) {
+void PopupWindow::setSelectedProcess(int idx)
+{
     selectedProcess_ = idx;
 }
 
-int PopupWindow::getSelectedProcess() const {
+int PopupWindow::getSelectedProcess() const
+{
     return selectedProcess_;
 }
