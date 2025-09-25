@@ -18,19 +18,19 @@
 1. Install dependencies (skip if you already have C/C++, Makefile and libncurses):
 
 ```bash  
-  sudo apt install build-essential libncurses-dev
+sudo apt install build-essential libncurses-dev
 ```
 2. Clone and build the project:
 
 ```bash
-  git clone https://github.com/oxonomiAK/synd3.git
-  cd synd3
-  make
+git clone https://github.com/oxonomiAK/synd3.git
+cd synd3
+make
 ```
 3. Run:
 
 ```bash
-  ./synd3
+./synd3
 ```
 
 ### From release (recommended)
@@ -39,24 +39,24 @@
 2. Install dependencies (skip if you already have `libncurses`):
 
 ```bash
-  sudo apt install libncurses-dev
+sudo apt install libncurses-dev
 ```
 3. Make it executable and run:
 
 ```bash
-  chmod +x synd3
-  ./synd3
+chmod +x synd3
+./synd3
 ```
 
 4. (Optional) Install globally:
 
 ```bash
-  sudo mv synd3 /usr/local/bin/
+sudo mv synd3 /usr/local/bin/
 ```
 Now you can run it from anywhere:
 
 ```bash
-  synd3
+synd3
 ```
     
 ## 📚Usage
@@ -64,12 +64,12 @@ Now you can run it from anywhere:
 If you installed from source or downloaded the binary (tested on Ubuntu and WSL):
 
 ```bash
-  ./synd3
+./synd3
 ```
 If you installed globally (moved to `/usr/local/bin`):
 
 ```bash
-  synd3
+synd3
 ```
 
 ### Controls
@@ -87,5 +87,4 @@ If you installed globally (moved to `/usr/local/bin`):
 ## 📄License
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/oxonomiAK/synd3/blob/main/LICENSE) file for details.
-
 
