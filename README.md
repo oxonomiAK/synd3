@@ -8,7 +8,7 @@
 
 ## 📸Screenshots
 
-![App Screenshot](https://github.com/oxonomiAK/synd3/blob/main/assets/images/Screenshot.png)
+![App Screenshot](https://github.com/oxonomiAK/synd3/blob/main/assets/images/Screenshot2026.png)
 
 
 ## 🚀Installation
