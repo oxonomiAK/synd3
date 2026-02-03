@@ -69,36 +69,7 @@ void get_process_mem_usage(pid_t pid, float *mem_usage)
     *mem_usage = ((float)rss_kb / (float)memTotal) * 100.0f;
 }
 
-// float calc_process_cpu_usage(unsigned long long prevProcessTicks, unsigned long long currProcessTicks, char *prevTotalBuff, char *currTotalBuff)
-// {
-//     unsigned long long deltaTotalTck = calcTotalCpuTck(prevTotalBuff, currTotalBuff);
-//     unsigned long long deltaProcTck = currProcessTicks - prevProcessTicks;
-
-//     return ((float)deltaProcTck / (float)deltaTotalTck) * 100.0f;
-// }
-
-// // get_process_cpu_usage - should be modified (without any sleep(1) function)
-// float get_process_cpu_usage(pid_t pid)
-// {
-//     char prevTotalBuffer[CPU_STAT_BUFFER_SIZE];
-//     char currTotalBuffer[CPU_STAT_BUFFER_SIZE];
-//     unsigned long long prevProcessTicks = 0;
-//     unsigned long long currProcessTicks = 0;
-
-//     get_process_ticks(pid, &prevProcessTicks);
-//     getProcStat(prevTotalBuffer, CPU_STAT_BUFFER_SIZE);
-
-//     sleep(1);
-
-//     get_process_ticks(pid, &currProcessTicks);
-//     getProcStat(currTotalBuffer, CPU_STAT_BUFFER_SIZE);
-
-//     float processCpu_Percentage = calc_process_cpu_usage(prevProcessTicks, currProcessTicks, prevTotalBuffer, currTotalBuffer);
-
-//     return processCpu_Percentage;
-// }
-
-void process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t pid)
+int process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t pid)
 {
     char path[256];
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid); // change with /proc/[PID]/cmdline and cut path(if possible)
@@ -107,12 +78,18 @@ void process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t
     if (file == NULL)
     {
         // perror("Could not open stat file");
-        return;
+        return 0;
     }
 
-    fgets(procNameBuffer, procNameBufferSize, file);
-    procNameBuffer[strcspn(procNameBuffer, "\n")] = 0;
+    if (fgets(procNameBuffer, procNameBufferSize, file) == NULL)
+    {
+        fclose(file);
+        return 0;
+    }
+
+    // procNameBuffer[strcspn(procNameBuffer, "\n")] = '\0';
     fclose(file);
+    return 1;
 }
 
 size_t get_process_list(ProcessInfo *buffer, size_t max)
@@ -132,9 +109,10 @@ size_t get_process_list(ProcessInfo *buffer, size_t max)
         if (pid <= 0)
             continue;
 
-        // snprintf(buffer[count].name, sizeof(buffer[count].name), "process_%d", pid);
-
-        process_name_parsing(buffer[count].name, sizeof(buffer[count].name), pid);
+        if (!process_name_parsing(buffer[count].name, sizeof(buffer[count].name), pid))
+        {
+            continue;
+        }
 
         buffer[count].pid = pid;
         // buffer[count].cpu_usage = 0.0f;

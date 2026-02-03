@@ -12,12 +12,15 @@ void getProcStat(char *buffer, const int size)
     if (file == NULL)
     {
         // perror("Could not open stat file");
+        buffer[0] = '\0';
         return;
     }
-    size_t ret = fread(buffer, sizeof(char), size, file);
+    size_t ret = fread(buffer, sizeof(char), size - 1, file);
+    buffer[ret] = '\0';
     if (ret == 0)
     {
         // perror("Could not read stat file");
+        buffer[0] = '\0';
         fclose(file);
         return;
     }
@@ -26,7 +29,7 @@ void getProcStat(char *buffer, const int size)
 
 unsigned long long getTotalCpuTicks()
 {
-    char buffer[CPU_STAT_BUFFER_SIZE];
+    char buffer[CPU_STAT_BUFFER_SIZE] = {0};
     getProcStat(buffer, CPU_STAT_BUFFER_SIZE);
     unsigned long long iowait = 0, irq = 0, softirq = 0, steal = 0, guest = 0, guestnice = 0, user = 0, nice = 0, system = 0, idle = 0;
     sscanf(buffer,

@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 CFLAGS=-Wall -Wextra -Iinclude
-LDFLAGS=-lncurses
+LDFLAGS=-lncurses 
 
 SRC_C=$(shell find src -name '*.c')
 SRC_CPP=$(shell find src -name '*.cpp')

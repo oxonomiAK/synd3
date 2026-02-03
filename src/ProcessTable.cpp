@@ -1,8 +1,9 @@
 #include "ProcessTable.h"
+
 #include <algorithm>
 #include <string.h>
 
-ProcessTable::ProcessTable(WINDOW* parent, SysStatistics& cpuStats)
+ProcessTable::ProcessTable(WINDOW *parent, SysStatistics &cpuStats)
     : cpuStats(cpuStats)
 {
     int height, width;
@@ -10,15 +11,18 @@ ProcessTable::ProcessTable(WINDOW* parent, SysStatistics& cpuStats)
     window_ = derwin(parent, height, width, 0, 0);
 }
 
-ProcessTable::~ProcessTable() {
+ProcessTable::~ProcessTable()
+{
     delwin(window_);
 }
 
-void ProcessTable::init() {
+void ProcessTable::init()
+{
     // any init
 }
 
-void ProcessTable::render(const std::vector<Process>& processes) {
+void ProcessTable::render(const std::vector<Process> &processes)
+{
     int max_y, max_x;
     getmaxyx(window_, max_y, max_x);
 
@@ -26,7 +30,7 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     wattron(window_, COLOR_PAIR(HEADER_COLOR));
 
     int widths[TOTAL_COLUMNS] = {7, 34, 10, 11};
-    const char* headers[TOTAL_COLUMNS] = {"PID", "NAME", "CPU", "MEM%"};
+    const char *headers[TOTAL_COLUMNS] = {"PID", "NAME", "CPU", "MEM%"};
 
     float percentUsed = (cpuStats.memUsed / cpuStats.memTotal) * 100.0f;
     snprintf(totalMEMUsageBuffer, sizeof(totalMEMUsageBuffer), "MEM%% %.2f", percentUsed);
@@ -43,25 +47,36 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     int x = left_panel_width + 1;
 
     // Render headers with updated widths
-    for (int i = 0; i < TOTAL_COLUMNS; i++) {
+    for (int i = 0; i < TOTAL_COLUMNS; i++)
+    {
         int col_width = widths[i];
-        if (x + col_width <= max_x) {
-            if (i == selected_column) {
+        if (x + col_width <= max_x)
+        {
+            if (i == selected_column)
+            {
                 wattron(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
-            } else {
+            }
+            else
+            {
                 wattron(window_, COLOR_PAIR(HEADER_COLOR));
             }
             mvwprintw(window_, 1, x, "%-*s", col_width, headers[i]);
             wattroff(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
             wattroff(window_, COLOR_PAIR(HEADER_COLOR));
-        } else if (x < max_x) {
+        }
+        else if (x < max_x)
+        {
             int available_width = max_x - x;
-            if (available_width > 0) {
+            if (available_width > 0)
+            {
                 char buffer[100];
                 snprintf(buffer, sizeof(buffer), "%-*.*s", available_width, available_width, headers[i]);
-                if (i == selected_column) {
+                if (i == selected_column)
+                {
                     wattron(window_, A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR));
-                } else {
+                }
+                else
+                {
                     wattron(window_, COLOR_PAIR(HEADER_COLOR));
                 }
                 mvwprintw(window_, 1, x, "%s", buffer);
@@ -78,11 +93,15 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     int start = scroll_offset;
     int end = std::min(start + visible_lines, (int)processes.size());
 
-    for (int i = start; i < end; i++, y++) {
-        const auto& p = processes[i];
-        if (i == selectedProcess_) {
+    for (int i = start; i < end; i++, y++)
+    {
+        const auto &p = processes[i];
+        if (i == selectedProcess_)
+        {
             wattron(window_, COLOR_PAIR(SELECTED_COLOR));
-        } else {
+        }
+        else
+        {
             wattron(window_, COLOR_PAIR(PROCESS_COLOR));
         }
 
@@ -93,11 +112,15 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         snprintf(pid_name_buffer, sizeof(pid_name_buffer), "%-8d %-34.34s", p.getPid(), p.getName().c_str());
         int pid_name_len = 8 + 1 + 34; // total 43 chars
 
-        if (x + pid_name_len <= max_x) {
+        if (x + pid_name_len <= max_x)
+        {
             mvwprintw(window_, y, x, "%s", pid_name_buffer);
-        } else if (x < max_x) {
+        }
+        else if (x < max_x)
+        {
             int avail = max_x - x;
-            if (avail > 0) {
+            if (avail > 0)
+            {
                 char buf[50];
                 snprintf(buf, sizeof(buf), "%.*s", avail, pid_name_buffer);
                 mvwprintw(window_, y, x, "%s", buf);
@@ -111,13 +134,17 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         snprintf(cpu_buffer, sizeof(cpu_buffer), "%.2f", p.getCpuUsage());
         int cpu_width = widths[2] - 1;
 
-        if (x + cpu_width <= max_x) {
+        if (x + cpu_width <= max_x)
+        {
             wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
             mvwprintw(window_, y, x, "%*s", cpu_width, cpu_buffer);
             wattroff(window_, COLOR_PAIR(CPU_TEXT_COLOR));
-        } else if (x < max_x) {
+        }
+        else if (x < max_x)
+        {
             int avail = max_x - x;
-            if (avail > 0) {
+            if (avail > 0)
+            {
                 char buf[32];
                 snprintf(buf, sizeof(buf), "%.*s", avail, cpu_buffer);
                 wattron(window_, COLOR_PAIR(CPU_TEXT_COLOR));
@@ -133,13 +160,17 @@ void ProcessTable::render(const std::vector<Process>& processes) {
         snprintf(mem_buffer, sizeof(mem_buffer), "%.2f", p.getMemUsage());
         int mem_width = widths[3];
 
-        if (x + mem_width <= max_x) {
+        if (x + mem_width <= max_x)
+        {
             wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
             mvwprintw(window_, y, x, "%*s", mem_width, mem_buffer);
             wattroff(window_, COLOR_PAIR(MEM_TEXT_COLOR));
-        } else if (x < max_x) {
+        }
+        else if (x < max_x)
+        {
             int avail = max_x - x;
-            if (avail > 0) {
+            if (avail > 0)
+            {
                 char buf[32];
                 snprintf(buf, sizeof(buf), "%.*s", avail, mem_buffer);
                 wattron(window_, COLOR_PAIR(MEM_TEXT_COLOR));
@@ -154,7 +185,7 @@ void ProcessTable::render(const std::vector<Process>& processes) {
 
     // Render footer as is
     wattron(window_, COLOR_PAIR(FOOTER_COLOR));
-    const char* footer = " F1:Help  F9:Kill  F10:Quit ";
+    const char *footer = " F1:Help  F9:Kill  F10:Quit ";
     int footer_len = static_cast<int>(strlen(footer));
     mvwprintw(window_, max_y - 1, max_x - footer_len, "%s", footer);
     wattroff(window_, COLOR_PAIR(FOOTER_COLOR));
@@ -162,81 +193,101 @@ void ProcessTable::render(const std::vector<Process>& processes) {
     wrefresh(window_);
 }
 
-
-
-
-bool ProcessTable::handleInput(size_t totalProcesses) {
-int ch = getch();
+bool ProcessTable::handleInput(size_t totalProcesses)
+{
+    int ch = getch();
     MEVENT event;
-    switch(ch) {
-        case KEY_UP:
-            if (selectedProcess_ > 0) selectedProcess_--;
-            break;
-        case KEY_DOWN:
-            if (selectedProcess_ < (int)totalProcesses - 1) selectedProcess_++;
-            break;
-        case KEY_LEFT:
-            selected_column = (selected_column - 1 + TOTAL_COLUMNS) % TOTAL_COLUMNS;
-            break;
-        case KEY_RIGHT:
-            selected_column = (selected_column + 1) % TOTAL_COLUMNS;
-            break;
-        case KEY_F(10):
-            return false;
-        case KEY_F(9):
-            showPopup = true; 
-            break;
-        case KEY_F(1):
-            showAbout = true;
-            break;
-        case KEY_MOUSE:
-            if (getmouse(&event) == OK) {
-                if (event.bstate & BUTTON4_PRESSED) {
-                    if (selectedProcess_ > 0) selectedProcess_--;
-                } else if (event.bstate & BUTTON5_PRESSED) {
-                    if (selectedProcess_ < (int)totalProcesses - 1) selectedProcess_++;
-                }
+    switch (ch)
+    {
+    case KEY_UP:
+        if (selectedProcess_ > 0)
+            selectedProcess_--;
+        break;
+    case KEY_DOWN:
+        if (selectedProcess_ < (int)totalProcesses - 1)
+            selectedProcess_++;
+        break;
+    case KEY_LEFT:
+        selected_column = (selected_column - 1 + TOTAL_COLUMNS) % TOTAL_COLUMNS;
+        break;
+    case KEY_RIGHT:
+        selected_column = (selected_column + 1) % TOTAL_COLUMNS;
+        break;
+    case KEY_F(10):
+        return false;
+
+    case KEY_F(9):
+        showPopup = true;
+        break;
+    case KEY_F(1):
+        showAbout = true;
+        break;
+    case KEY_MOUSE:
+        if (getmouse(&event) == OK)
+        {
+            if (event.bstate & BUTTON4_PRESSED)
+            {
+                if (selectedProcess_ > 0)
+                    selectedProcess_--;
             }
-            break;
+            else if (event.bstate & BUTTON5_PRESSED)
+            {
+                if (selectedProcess_ < (int)totalProcesses - 1)
+                    selectedProcess_++;
+            }
+        }
+        break;
     }
     int max_y, max_x;
     getmaxyx(window_, max_y, max_x);
     int visible_lines = max_y - 3;
-    if (selectedProcess_ < scroll_offset) {
+    if (selectedProcess_ < scroll_offset)
+    {
         scroll_offset = selectedProcess_;
-    } else if (selectedProcess_ >= scroll_offset + visible_lines) {
+    }
+    else if (selectedProcess_ >= scroll_offset + visible_lines)
+    {
         scroll_offset = selectedProcess_ - visible_lines + 1;
     }
     return true;
 }
 
-void ProcessTable::shutdown() {
+void ProcessTable::shutdown()
+{
     // cleanup
 }
-void ProcessTable::setSelectedColumn(int col) {
+void ProcessTable::setSelectedColumn(int col)
+{
     selected_column = col;
 }
-int ProcessTable::getSelectedColumn() const{
+int ProcessTable::getSelectedColumn() const
+{
     return selected_column;
 };
 
-void ProcessTable::setSelectedProcess(int idx) {
+void ProcessTable::setSelectedProcess(int idx)
+{
     selectedProcess_ = idx;
 }
 
-int ProcessTable::getSelectedProcess() const {
+int ProcessTable::getSelectedProcess() const
+{
     return selectedProcess_;
 }
 
-bool ProcessTable::getShowPopup() const {
+bool ProcessTable::getShowPopup() const
+{
     return showPopup;
 }
-void ProcessTable::setshowPopup(bool pressed) {
+void ProcessTable::setshowPopup(bool pressed)
+{
     showPopup = pressed;
 }
-bool ProcessTable::getShowAbout() const {
+bool ProcessTable::getShowAbout() const
+{
     return showAbout;
 }
-void ProcessTable::setShowAbout(bool pressed) {
+void ProcessTable::setShowAbout(bool pressed)
+{
     showAbout = pressed;
 }

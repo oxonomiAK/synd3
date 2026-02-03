@@ -8,6 +8,7 @@
 
 int main()
 {
+
     bool running = true;
     std::vector<Process> processes;
     std::vector<Process> prevProcesses;
@@ -15,8 +16,8 @@ int main()
 
     char prevBuffer[CPU_STAT_BUFFER_SIZE];
     char currentBuffer[CPU_STAT_BUFFER_SIZE];
-    
-    getProcStat(prevBuffer, CPU_STAT_BUFFER_SIZE);  
+
+    getProcStat(prevBuffer, CPU_STAT_BUFFER_SIZE);
     memcpy(currentBuffer, prevBuffer, CPU_STAT_BUFFER_SIZE);
 
     unsigned long long prevTotalTicks = getTotalCpuTicks();
@@ -24,10 +25,10 @@ int main()
 
     MainWindow ui(processes);
     ui.init();
-    SysStatistics& Sys = ui.getSysStatisics();
+    SysStatistics &Sys = ui.getSysStatisics();
     size_t memTotal = 0;
     getMemTotal(&memTotal, sizeof(memTotal));
-    Sys.memTotal = memTotal; 
+    Sys.memTotal = memTotal;
 
     std::chrono::steady_clock::time_point lastRenderTime = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point lastSampleTime = std::chrono::steady_clock::now();
@@ -47,17 +48,17 @@ int main()
             prevProcesses = currProcesses;
             prevTotalTicks = currTotalTicks;
             memcpy(prevBuffer, currentBuffer, CPU_STAT_BUFFER_SIZE);
-           
+
             getProcStat(currentBuffer, CPU_STAT_BUFFER_SIZE);
             getCpuStats(&Sys.CPUtotal, Sys.CPUpercore, sizeof(Sys.CPUtotal), sizeof(Sys.CPUpercore), prevBuffer, currentBuffer);
-            
+
             getLoadavgData(Sys.loadAvg, &Sys.runningTasks, &Sys.totalTasks, sizeof(Sys.loadAvg), sizeof(Sys.runningTasks), sizeof(Sys.totalTasks));
             getUptimeSeconds(&Sys.uptimeSeconds, sizeof(Sys.uptimeSeconds));
             getMemUsedInKB(&Sys.memUsed, sizeof(Sys.memUsed));
 
             currProcesses = fetchProcesses();
             currTotalTicks = getTotalCpuTicks();
-            
+
             for (auto &proc : currProcesses)
             {
                 for (auto &prev : prevProcesses)
