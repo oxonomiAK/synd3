@@ -19,4 +19,6 @@ jobs:
         run: make
 
       - name: Smoke test
-        run: ./synd3
+        run: |
+          export TERM=xterm
+          ./synd3
