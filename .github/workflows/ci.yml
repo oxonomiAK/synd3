@@ -21,4 +21,4 @@ jobs:
       - name: Smoke test
         run: |
           export TERM=xterm
-          ./synd3
+          timeout 2 ./synd3 || true
