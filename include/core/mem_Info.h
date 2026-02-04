@@ -1,10 +1,6 @@
 #ifndef MEM_INFO_H
 #define MEM_INFO_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 #define MEM_INFO_BUFFER_SIZE 1024
 #include <stddef.h>
     typedef struct
@@ -38,8 +34,6 @@ extern "C"
     void getCachedMem(size_t *cachedMem, size_t cachedMemSize);
     void MemUsed();
     void getMemUsedInKB(float *memUsed, size_t memUsedSize);
-#ifdef __cplusplus
-}
-#endif
+
 
 #endif
