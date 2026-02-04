@@ -1,10 +1,6 @@
 #ifndef PROCESS_INFO_H
 #define PROCESS_INFO_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 #include <stddef.h>    // size_t
 #include <stdint.h>    // uint64_t
@@ -14,7 +10,7 @@ extern "C"
     {
         int pid;
         char name[256];
-        // float cpu_usage;
+        float cpu_usage;
         float mem_usage;
         unsigned long long process_ticks;
     } ProcessInfo;
@@ -25,8 +21,6 @@ extern "C"
     float get_process_cpu_usage(pid_t pid);
     int process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t pid);
 
-#ifdef __cplusplus
-}
-#endif
+
 
 #endif

@@ -1,11 +1,6 @@
 #ifndef CPU_STATS_H
 #define CPU_STATS_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #define CPU_STAT_BUFFER_SIZE 1024
 #include <stddef.h> // size_t
     typedef struct
@@ -39,8 +34,7 @@ extern "C"
     void LoadAvgData();
     void getUptimeSeconds(double *uptimeSeconds, size_t uptimeSecondsSize);
     void UptimeSeconds();
-#ifdef __cplusplus
-}
-#endif
+
+
 
 #endif
