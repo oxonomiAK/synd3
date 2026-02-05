@@ -49,7 +49,7 @@ void drawLeftPanel(WINDOW *left_panel, d_arr *procesess, SysStatistics Sys)
         for(int i = 0; i <= wordCount; i++)
         {
             int wordLen = strlen(nameByWords[i]);
-            if(wordLen + strlen(buff) < LEFT_PANEL_WIDTH-2) // 2 = max 1 pixel gap between line and symbol
+            if(wordLen + strlen(buff) < LEFT_PANEL_WIDTH-6) // 6 = max 1 pixel gap between line and symbol
             {
                 strcat(buff, nameByWords[i]);
             }else{
