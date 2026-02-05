@@ -52,11 +52,11 @@ void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStatistics Sys
             //print under MEM%
             sprintf(buff, "%.2f", procesess->process[i].mem_usage);
             wattron(process_table, COLOR_PAIR(MEM_TEXT_COLOR));
-            mvwaddnstr(process_table, y, layout.memValX, buff, -1);
+            mvwaddnstr(process_table, y, layout.memValX, buff, layout.colToPrint[MEM]-3);
             //print uder CPU%
             wattron(process_table, COLOR_PAIR(CPU_TEXT_COLOR));
             sprintf(buff, "%.2f", procesess->process[i].cpu_usage);
-            mvwaddnstr(process_table, y, layout.cpuValX, buff, -1);
+            mvwaddnstr(process_table, y, layout.cpuValX, buff, layout.colToPrint[CPU]-3);
                 
             wattroff(process_table, COLOR_PAIR(CPU_TEXT_COLOR));
 
@@ -118,7 +118,7 @@ void calculateLayout(Layout *l, int maxx, int collapse, SysStatistics Sys)
         l->colToPrint[CPU] = maxx - l->colX[CPU];
         
         l->colX[NAME] = l->pidWidth + 1;
-        l->colToPrint[NAME] = (maxx < l->pidWidth + COLLAPSE_NAME_WIDTH) ? maxx - PID_WIDTH : COLLAPSE_NAME_WIDTH;
+        l->colToPrint[NAME] = (maxx < l->pidWidth + COLLAPSE_NAME_WIDTH) ? maxx - PID_WIDTH-1 : COLLAPSE_NAME_WIDTH;
     } else {
         l->colX[MEM] = maxx - l->memWidth;
         l->colToPrint[MEM] = -1;
