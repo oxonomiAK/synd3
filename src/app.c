@@ -1,13 +1,12 @@
-#include "app.h" 
+#include "app.h"
 
-long long timeInMilliseconds(void) 
+long long timeInMilliseconds(void)
 {
     struct timeval tv;
 
-    gettimeofday(&tv,NULL);
-    return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
+    gettimeofday(&tv, NULL);
+    return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
 }
-
 
 static int updateAllowed = 1;
 void appRun()
@@ -18,13 +17,11 @@ void appRun()
     SysStatistics Sys;
     ptParams ptPr;
     TUIManager wins;
-    
-
 
     int running = 1;
 
     appInit(&wins, &Sys, &ptPr);
-    
+
     char prevBuffer[CPU_STAT_BUFFER_SIZE];
     char currentBuffer[CPU_STAT_BUFFER_SIZE];
 
@@ -44,36 +41,32 @@ void appRun()
     long long lastRenderTime = timeInMilliseconds();
     long long lastSampleTime = timeInMilliseconds();
 
-    while(running)
+    while (running)
     {
-
         running = handleMainInput(&ptPr.selectedColumn, &ptPr.selectedProcess, currProcesses, wins);
         long long timepPoint = timeInMilliseconds();
-        
 
-        if((timepPoint- lastSampleTime) >= sampleIntervalMs && updateAllowed)
+        if ((timepPoint - lastSampleTime) >= sampleIntervalMs && updateAllowed)
         {
             prevProcesses = currProcesses;
             prevTotalTicks = currTotalTicks;
             memcpy(prevBuffer, currentBuffer, CPU_STAT_BUFFER_SIZE);
 
-
             getProcStat(currentBuffer, CPU_STAT_BUFFER_SIZE);
             getCpuStats(&Sys.CPUtotal, Sys.CPUpercore, sizeof(Sys.CPUtotal), sizeof(Sys.CPUpercore), prevBuffer, currentBuffer);
-            
+
             getLoadavgData(Sys.loadAvg, &Sys.runningTasks, &Sys.totalTasks, sizeof(Sys.loadAvg), sizeof(Sys.runningTasks), sizeof(Sys.totalTasks));
             getUptimeSeconds(&Sys.uptimeSeconds, sizeof(Sys.uptimeSeconds));
             getMemUsedInKB(&Sys.memUsed, sizeof(Sys.memUsed));
-            
+            deleteAr(&currProcesses);
             currProcesses = fetchProcesses();
             currTotalTicks = getTotalCpuTicks();
-        
+
             Sys.percentMemUsed = (Sys.memUsed / Sys.memTotal) * 100.0f;
-        
-            
-            for (int i = 0; i<=currProcesses.size; i++)
+
+            for (int i = 0; i <= currProcesses.size; i++)
             {
-                for (int j = 0; j<=prevProcesses.size; j++)
+                for (int j = 0; j <= prevProcesses.size; j++)
                 {
                     if (currProcesses.process[i].pid == prevProcesses.process[j].pid)
                     {
@@ -87,30 +80,24 @@ void appRun()
             }
             lastSampleTime = timepPoint;
         }
-        if((timepPoint- lastRenderTime)>= renderIntervalMs)
+        if ((timepPoint - lastRenderTime) >= renderIntervalMs)
         {
             processes = currProcesses;
             sortColumns(&ptPr, &processes);
             uiDraw(&wins, &processes, Sys, &ptPr);
 
-
             lastRenderTime = timepPoint;
         }
-        
 
-
-        usleep(10000); //in microseconds, 10000 microsec = 10 millisec
+        usleep(10000); // in microseconds, 10000 microsec = 10 millisec
     }
-
-
+    deleteAr(&currProcesses);
     appCleanup();
 }
 
-
-
 void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr)
 {
-    initscr();			/* Start curses mode 		  */
+    initscr(); /* Start curses mode 		  */
     start_color();
     refresh();
     uiInit(wins);
@@ -119,27 +106,26 @@ void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr)
     cbreak();
     curs_set(0);
     timeout(100);
-    
+
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
     mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
     getThreadCount(&Sys->coreCount, sizeof(Sys->coreCount));
     getCpuName(Sys->cpuName, sizeof(Sys->cpuName));
-    
 }
 
 void structInit(SysStatistics *Sys, ptParams *ptPr)
 {
     int size = sizeof(Sys->CPUpercore) / sizeof(Sys->CPUpercore[0]);
-    
-    for(int i = 0; i <=size; i++)
+
+    for (int i = 0; i <= size; i++)
     {
         Sys->CPUpercore[i] = 0;
     }
     Sys->CPUtotal = 0.0f;
-    
+
     size = sizeof(Sys->loadAvg) / sizeof(Sys->loadAvg[0]);
-    for(int i = 0; i <= size; i++)
+    for (int i = 0; i <= size; i++)
     {
         Sys->loadAvg[i] = 0.0;
     }
@@ -149,15 +135,14 @@ void structInit(SysStatistics *Sys, ptParams *ptPr)
     Sys->runningTasks = 0;
     Sys->totalTasks = 0;
     Sys->uptimeSeconds = 0;
-    
+
     ptPr->scrollOffset = 0;
     ptPr->selectedColumn = 0;
     ptPr->selectedProcess = 0;
 }
 void appCleanup()
 {
-
-    endwin();			/* End curses mode		  */
+    endwin(); /* End curses mode		  */
 }
 
 void noUpdate()
