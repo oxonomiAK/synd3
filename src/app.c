@@ -12,8 +12,8 @@ static int updateAllowed = 1;
 void appRun()
 {
     d_arr processes;
-    d_arr prevProcesses;
-    d_arr currProcesses;
+    d_arr prevProcesses = {0};
+    d_arr currProcesses = {0};
     SysStatistics Sys;
     ptParams ptPr;
     TUIManager wins;
@@ -43,12 +43,13 @@ void appRun()
 
     while (running)
     {
-        running = handleMainInput(&ptPr.selectedColumn, &ptPr.selectedProcess, currProcesses, wins);
+        running = handleMainInput(&ptPr.selectedColumn, &ptPr.selectedProcess, &currProcesses, wins);
         long long timepPoint = timeInMilliseconds();
 
         if ((timepPoint - lastSampleTime) >= sampleIntervalMs && updateAllowed)
         {
-            prevProcesses = currProcesses;
+            // deepcopy after memory free
+            copyProcesses(&prevProcesses, &currProcesses);
             prevTotalTicks = currTotalTicks;
             memcpy(prevBuffer, currentBuffer, CPU_STAT_BUFFER_SIZE);
 
@@ -58,15 +59,16 @@ void appRun()
             getLoadavgData(Sys.loadAvg, &Sys.runningTasks, &Sys.totalTasks, sizeof(Sys.loadAvg), sizeof(Sys.runningTasks), sizeof(Sys.totalTasks));
             getUptimeSeconds(&Sys.uptimeSeconds, sizeof(Sys.uptimeSeconds));
             getMemUsedInKB(&Sys.memUsed, sizeof(Sys.memUsed));
+            // free currProcesses
             deleteAr(&currProcesses);
             currProcesses = fetchProcesses();
             currTotalTicks = getTotalCpuTicks();
 
             Sys.percentMemUsed = (Sys.memUsed / Sys.memTotal) * 100.0f;
 
-            for (int i = 0; i <= currProcesses.size; i++)
+            for (int i = 0; i < currProcesses.size; i++)
             {
-                for (int j = 0; j <= prevProcesses.size; j++)
+                for (int j = 0; j < prevProcesses.size; j++)
                 {
                     if (currProcesses.process[i].pid == prevProcesses.process[j].pid)
                     {
@@ -91,7 +93,8 @@ void appRun()
 
         usleep(10000); // in microseconds, 10000 microsec = 10 millisec
     }
-    deleteAr(&currProcesses);
+    // temp solution (will merging to appCleanup())
+    freeMemory(&prevProcesses, &currProcesses);
     appCleanup();
 }
 
@@ -118,14 +121,14 @@ void structInit(SysStatistics *Sys, ptParams *ptPr)
 {
     int size = sizeof(Sys->CPUpercore) / sizeof(Sys->CPUpercore[0]);
 
-    for (int i = 0; i <= size; i++)
+    for (int i = 0; i < size; i++)
     {
         Sys->CPUpercore[i] = 0;
     }
     Sys->CPUtotal = 0.0f;
 
     size = sizeof(Sys->loadAvg) / sizeof(Sys->loadAvg[0]);
-    for (int i = 0; i <= size; i++)
+    for (int i = 0; i < size; i++)
     {
         Sys->loadAvg[i] = 0.0;
     }
