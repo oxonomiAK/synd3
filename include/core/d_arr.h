@@ -16,5 +16,7 @@ typedef struct
 void createAr(d_arr *ptr, int size);
 void deleteAr(d_arr *ptr);
 void pushback(ProcessInfo *process, d_arr *ptr);
+void copyProcesses(d_arr *dest, d_arr *src);
+void freeMemory(d_arr *prev, d_arr *curr);
 
 #endif

@@ -5,6 +5,6 @@
 #include <signal.h>
 #include <errno.h>
 
-int killProcess(d_arr processes, int selectedProcess);
+int killProcess(d_arr *processes, int selectedProcess);
 
 #endif
