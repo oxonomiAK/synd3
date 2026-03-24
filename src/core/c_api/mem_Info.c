@@ -55,14 +55,18 @@ void getMemUsedInKB(float *memUsed, size_t memUsedSize)
 void MemTotal()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
 
-    fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+    if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+    {
+        fclose(file);
+        return;
+    }
 
     char *temp = buffer + 9;
     meminfo.memTotal = atoi(temp);
@@ -72,15 +76,19 @@ void MemTotal()
 void MemFree()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-    for (size_t i = 0; i <= 1; i++)
+    for (size_t i = 0; i < 2; i++)
     {
-        fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+        if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+        {
+            fclose(file);
+            return;
+        }
     }
     char *temp = buffer + 9;
     meminfo.memFree = atoi(temp);
@@ -99,15 +107,19 @@ void MemTotalUsed()
 void Buffers()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-    for (size_t i = 0; i <= 3; i++)
+    for (size_t i = 0; i < 4; i++)
     {
-        fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+        if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+        {
+            fclose(file);
+            return;
+        }
     }
     char *temp = buffer + 8;
     meminfo.buffers = atoi(temp);
@@ -117,15 +129,19 @@ void Buffers()
 void Cached()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-    for (size_t i = 0; i <= 4; i++)
+    for (size_t i = 0; i < 5; i++)
     {
-        fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+        if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+        {
+            fclose(file);
+            return;
+        }
     }
     char *temp = buffer + 7;
     meminfo.cached = atoi(temp);
@@ -135,15 +151,19 @@ void Cached()
 void SReclaimable()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-    for (size_t i = 0; i <= 23; i++)
+    for (size_t i = 0; i < 24; i++)
     {
-        fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+        if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+        {
+            fclose(file);
+            return;
+        }
     }
     char *temp = buffer + 13;
     meminfo.sReclaimable = atoi(temp);
@@ -153,15 +173,19 @@ void SReclaimable()
 void Shmem()
 {
     FILE *file = fopen("/proc/meminfo", "r");
-    char buffer[MEM_INFO_BUFFER_SIZE];
-    if (file == NULL)
+    char buffer[MEM_INFO_BUFFER_SIZE] = {0};
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-    for (size_t i = 0; i <= 20; i++)
+    for (size_t i = 0; i < 21; i++)
     {
-        fgets(buffer, MEM_INFO_BUFFER_SIZE, file);
+        if (!fgets(buffer, MEM_INFO_BUFFER_SIZE, file))
+        {
+            fclose(file);
+            return;
+        }
     }
     char *temp = buffer + 6;
     meminfo.shmem = atoi(temp);
