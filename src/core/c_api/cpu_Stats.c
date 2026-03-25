@@ -9,7 +9,7 @@ CpuStats cpustats;
 void getProcStat(char *buffer, const int size)
 {
     FILE *file = fopen("/proc/stat", "r");
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open stat file");
         buffer[0] = '\0';
@@ -68,7 +68,7 @@ void calcEveryCoreUsage(char *prevBuffer, char *currentBuffer)
     char *pBuffer = prevBuffer;
     char *cBuffer = currentBuffer;
     size_t count = 0;
-    size_t threads;
+    size_t threads = 0;
     getThreadCount(&threads, sizeof(threads));
     pBuffer = prevBuffer + count + strcspn(prevBuffer, "\n") + 2;
     cBuffer = currentBuffer + count + strcspn(currentBuffer, "\n") + 2;
@@ -157,11 +157,12 @@ void CoreCount()
 {
     FILE *file = fopen("/proc/cpuinfo", "r");
     char buffer[CPU_STAT_BUFFER_SIZE];
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
+    // temp solution (needs parse by line name)
     for (size_t i = 0; i <= 12; i++)
     {
         fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
@@ -175,12 +176,12 @@ void CpuName()
 {
     FILE *file = fopen("/proc/cpuinfo", "r");
     char buffer[CPU_STAT_BUFFER_SIZE];
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open file");
         return;
     }
-
+    // temp solution (needs parse by line name)
     for (size_t i = 0; i <= 4; i++)
     {
         fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
@@ -188,8 +189,10 @@ void CpuName()
 
     char *newline = strchr(buffer, '\n');
     if (newline)
+    {
         *newline = '\0';
-
+    }
+    // temp solution! pointer arithmetic
     char *cpuName = buffer + 13;
 
     strncpy(cpustats.cpuName, cpuName, sizeof(cpustats.cpuName) - 1);
@@ -201,7 +204,7 @@ void UptimeSeconds()
 {
     FILE *file = fopen("/proc/uptime", "r");
     char buffer[CPU_STAT_BUFFER_SIZE];
-    if (file == NULL)
+    if (!file)
     {
         perror("Could not open /proc/uptime");
         return;
@@ -217,12 +220,12 @@ void UptimeSeconds()
 void LoadAvgData()
 {
     FILE *file = fopen("/proc/loadavg", "r");
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open loadavg file");
         return;
     }
-    char buffer[CPU_STAT_BUFFER_SIZE];
+    char buffer[CPU_STAT_BUFFER_SIZE] = {0};
     fgets(buffer, CPU_STAT_BUFFER_SIZE, file);
     fclose(file);
 
@@ -230,7 +233,15 @@ void LoadAvgData()
 }
 void ThreadCount()
 {
-    cpustats.threadCount = sysconf(_SC_NPROCESSORS_ONLN);
+    long threadCount = sysconf(_SC_NPROCESSORS_ONLN);
+    if (threadCount > 0)
+    {
+        cpustats.threadCount = threadCount;
+    }
+    else
+    {
+        cpustats.threadCount = 1; // make error condition
+    }
 }
 
 void getTotalCpuUsage(char *prevBuffer, char *currentBuffer)

@@ -8,13 +8,14 @@
 #include "core/cpu_Stats.h"
 #include "core/mem_Info.h"
 
+// Needs refactoring to prevent mistakes in fscanf()!
 void get_process_ticks(pid_t pid, unsigned long long *buff)
 {
     char path[64];
     snprintf(path, sizeof(path), "/proc/%d/stat", pid);
     FILE *file = fopen(path, "r");
 
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open stat file");
         return;
@@ -22,7 +23,11 @@ void get_process_ticks(pid_t pid, unsigned long long *buff)
 
     unsigned long long utime = 0, stime = 0;
 
-    fscanf(file, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %llu %llu", &utime, &stime);
+    if (fscanf(file, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %llu %llu", &utime, &stime) != 2)
+    {
+        fclose(file);
+        return;
+    }
 
     fclose(file);
 
@@ -35,19 +40,28 @@ void get_process_rss_kb(pid_t pid, unsigned long long *buff)
     snprintf(path, sizeof(path), "/proc/%d/statm", pid);
     FILE *file = fopen(path, "r");
 
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open statm file");
         return;
     }
     unsigned long rss = 0;   // Resident Set Size in pages
     unsigned long dummy = 0; // Dummy variable to skip the first value (total program size)
-    fscanf(file, "%lu %lu", &dummy, &rss);
+    if (fscanf(file, "%lu %lu", &dummy, &rss) != 2)
+    {
+        fclose(file);
+        return;
+    }
     fclose(file);
 
-    long page_size = sysconf(_SC_PAGE_SIZE) / 1024; // Get the system's page size in bytes
+    long page_size = sysconf(_SC_PAGE_SIZE); // Get the system's page size in bytes
 
-    *buff = rss * page_size;
+    if (page_size <= 0)
+    {
+        return;
+    }
+
+    *buff = (unsigned long long)rss * page_size / 1024;
 }
 
 // get_process_mem_usage - calculates the memory usage of a process in percentage
@@ -58,7 +72,7 @@ void get_process_mem_usage(pid_t pid, float *mem_usage)
     get_process_rss_kb(pid, &rss_kb);
     getMemTotal(&memTotal, sizeof(memTotal)); // Get total memory in KB
 
-    if (memTotal == 0)
+    if (!memTotal)
     {
         *mem_usage = 0.0f;
         return;
@@ -75,13 +89,13 @@ int process_name_parsing(char *procNameBuffer, size_t procNameBufferSize, pid_t 
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid); // change with /proc/[PID]/cmdline and cut path(if possible)
     FILE *file = fopen(path, "r");
 
-    if (file == NULL)
+    if (!file)
     {
         // perror("Could not open stat file");
         return 0;
     }
 
-    if (fgets(procNameBuffer, procNameBufferSize, file) == NULL)
+    if (!fgets(procNameBuffer, procNameBufferSize, file))
     {
         fclose(file);
         return 0;
@@ -103,7 +117,7 @@ size_t get_process_list(ProcessInfo *buffer, size_t max)
 
     while ((entry = readdir(proc)) && count < max)
     {
-        if (entry->d_type != DT_DIR)
+        if (entry->d_type != DT_DIR && entry->d_type != DT_UNKNOWN)
             continue;
         int pid = atoi(entry->d_name);
         if (pid <= 0)
