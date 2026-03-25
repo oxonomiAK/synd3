@@ -18,6 +18,7 @@ void structInit(SysStatistics *Sys, ptParams *ptPr);
 void appCleanup();
 void noUpdate();
 void resumeUpdate();
+void initCpuUsage(d_arr *Processes);
 
 
 #endif

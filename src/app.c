@@ -36,6 +36,9 @@ void appRun()
     unsigned long long currTotalTicks = prevTotalTicks;
     currProcesses = fetchProcesses();
 
+    // filling cpu_usage with float
+    initCpuUsage(&currProcesses);
+
     const int renderIntervalMs = 50;
     const int sampleIntervalMs = 1000;
     long long lastRenderTime = timeInMilliseconds();
@@ -102,7 +105,6 @@ void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr)
 {
     initscr(); /* Start curses mode 		  */
     start_color();
-    refresh();
     uiInit(wins);
     structInit(Sys, ptPr);
     noecho();
@@ -155,4 +157,12 @@ void noUpdate()
 void resumeUpdate()
 {
     updateAllowed = 1;
+}
+
+// filling cpu_usage with float (calling once at the start)
+// temp solution(temp placement in app.c)
+void initCpuUsage(d_arr *Processes){
+    for (int i = 0; i < Processes->size; i++){
+        Processes->process[i].cpu_usage = 0.0f;
+    }
 }
