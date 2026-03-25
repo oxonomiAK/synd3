@@ -1,4 +1,30 @@
 #include "app.h"
+#include "core/cli.h"
+#include "core/commands.h"
+
+int handleArgs(int argc, char *argv[])
+{
+    AppConfig config = {0};
+
+    if (parseArguments(argc, argv, &config) != 0)
+    {
+        return 1;
+    }
+
+    if (config.show_help)
+    {
+        print_help();
+        return 0;
+    }
+
+    if (config.show_version)
+    {
+        print_version();
+        return 0;
+    }
+    appRun();
+    return 0;
+}
 
 long long timeInMilliseconds(void)
 {
@@ -161,8 +187,10 @@ void resumeUpdate()
 
 // filling cpu_usage with float (calling once at the start)
 // temp solution(temp placement in app.c)
-void initCpuUsage(d_arr *Processes){
-    for (int i = 0; i < Processes->size; i++){
+void initCpuUsage(d_arr *Processes)
+{
+    for (int i = 0; i < Processes->size; i++)
+    {
         Processes->process[i].cpu_usage = 0.0f;
     }
 }

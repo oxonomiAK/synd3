@@ -1,8 +1,6 @@
 #include "app.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    
-    appRun();
-	return 0;
+    return handleArgs(argc, argv);
 }
