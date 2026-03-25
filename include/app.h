@@ -9,9 +9,6 @@
 #include <sys/time.h>
 #include "core/sort_col.h"
 
-
-
-
 void appRun();
 void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr);
 void structInit(SysStatistics *Sys, ptParams *ptPr);
@@ -19,6 +16,6 @@ void appCleanup();
 void noUpdate();
 void resumeUpdate();
 void initCpuUsage(d_arr *Processes);
-
+int handleArgs(int argc, char *argv[]);
 
 #endif
