@@ -106,14 +106,25 @@ void resizePopup(TUIManager *wins, int maxy, int maxx)
 
 void colorPairInit()
 {
-    init_pair(TITLE_COLOR, 10, COLOR_CYAN);
-    init_pair(HEADER_COLOR, 144, 17);
+    // 1:text color, 2:background color
+    int HeadColText = 144;
+    int HeadColBack = 17;
+    int HighlColText = 15;
+
+    if(COLORS < 256){
+        HeadColText = COLOR_BLACK;
+        HeadColBack = COLOR_CYAN;
+        HighlColText = COLOR_WHITE;
+    }
+
+
+    init_pair(HEADER_COLOR, HeadColText, HeadColBack);
+    init_pair(HIGHLIGHT_COLOR, HighlColText, COLOR_BLUE);
     init_pair(SELECTED_COLOR, COLOR_WHITE, COLOR_BLUE);
     init_pair(PROCESS_COLOR, COLOR_WHITE, COLOR_BLACK);
     init_pair(CPU_BAR_COLOR, COLOR_BLACK, COLOR_GREEN);
     init_pair(MEM_BAR_COLOR, COLOR_BLACK, COLOR_MAGENTA);
     init_pair(TEXT_COLOR, COLOR_WHITE, COLOR_BLACK);
-    init_pair(HIGHLIGHT_COLOR, 15, COLOR_BLUE);
     init_pair(CPU_TEXT_COLOR, COLOR_CYAN, COLOR_BLACK);
     init_pair(MEM_TEXT_COLOR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(FOOTER_COLOR, COLOR_CYAN, COLOR_BLACK);
