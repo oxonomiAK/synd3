@@ -7,7 +7,7 @@ void initLeftPanel(WINDOW **left_panel, WINDOW *main_window)
     *left_panel = newwin(maxy - 2, maxx <= LEFT_PANEL_WIDTH ? maxx - 2 : LEFT_PANEL_WIDTH, 1, 1);
 }
 
-void drawLeftPanel(WINDOW *left_panel, d_arr *procesess, SysStatistics Sys)
+void drawLeftPanel(WINDOW *left_panel, d_arr *procesess, SysStat Sys)
 {
     int maxx, maxy;
     getmaxyx(left_panel, maxy, maxx);

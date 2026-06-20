@@ -18,8 +18,8 @@ typedef struct {
 } TUIManager;
 
 void colorPairInit();
-void uiInit(TUIManager *wins);
-void uiDraw(TUIManager *wins, d_arr *procesess, SysStatistics Sys, ptParams *ptPr);
+void uiInit(TUIManager *wins, SysStat Sys);
+void uiDraw(TUIManager *wins, d_arr *procesess, SysStat Sys, ptParams *ptPr);
 void resize(TUIManager *wins);
 void resizePopup(TUIManager *wins, int maxy, int maxx);
 void showAbout();

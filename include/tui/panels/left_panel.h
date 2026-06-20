@@ -8,7 +8,7 @@
 #include "core/process.h"
 
 void initLeftPanel(WINDOW **left_panel, WINDOW *main_window);
-void drawLeftPanel(WINDOW *process_table, d_arr *procesess, SysStatistics Sys);
+void drawLeftPanel(WINDOW *process_table, d_arr *procesess, SysStat Sys);
 
 
 

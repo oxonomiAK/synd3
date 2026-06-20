@@ -10,8 +10,8 @@
 #include "core/sort_col.h"
 
 void appRun();
-void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr);
-void structInit(SysStatistics *Sys, ptParams *ptPr);
+void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptPr);
+void structInit(SysStat *Sys, ptParams *ptPr);
 void appCleanup();
 void noUpdate();
 void resumeUpdate();
