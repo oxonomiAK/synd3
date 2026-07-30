@@ -3,12 +3,12 @@
 
 static int showAbout_ = 0;
 static int showPopup_ = 0;
-void uiInit(TUIManager *wins)
+void uiInit(TUIManager *wins, SysStat Sys)
 {
 
     colorPairInit();
     initMainWindow(&wins->main_win);
-    initProcessTable(&wins->process_table, wins->main_win);
+    initProcessTable(&wins->process_table, wins->main_win, Sys);
     initLeftPanel(&wins->left_panel, wins->main_win);
     initAbout(&wins->about, wins->main_win);
     initPopup(&wins->popup, wins->main_win);
@@ -16,7 +16,7 @@ void uiInit(TUIManager *wins)
 }
 
 
-void uiDraw(TUIManager *wins, d_arr *procesess, SysStatistics Sys, ptParams *ptPr)
+void uiDraw(TUIManager *wins, d_arr *procesess, SysStat Sys, ptParams *ptPr)
 {
     if(showAbout_)
     {

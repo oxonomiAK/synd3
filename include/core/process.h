@@ -9,7 +9,7 @@ typedef struct{
     size_t runningTasks, totalTasks, coreCount;
     double uptimeSeconds;
     char cpuName[64];
-}SysStatistics;
+}SysStat;
 d_arr fetchProcesses();
 
 #endif

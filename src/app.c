@@ -40,7 +40,7 @@ void appRun()
     d_arr processes;
     d_arr prevProcesses = {0};
     d_arr currProcesses = {0};
-    SysStatistics Sys;
+    SysStat Sys;
     ptParams ptPr;
     TUIManager wins;
 
@@ -127,12 +127,13 @@ void appRun()
     appCleanup();
 }
 
-void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr)
+void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptPr)
 {
     initscr(); /* Start curses mode 		  */
     start_color();
-    uiInit(wins);
     structInit(Sys, ptPr);
+    uiInit(wins, *Sys);
+    
     noecho();
     cbreak();
     curs_set(0);
@@ -145,7 +146,7 @@ void appInit(TUIManager *wins, SysStatistics *Sys, ptParams *ptPr)
     getCpuName(Sys->cpuName, sizeof(Sys->cpuName));
 }
 
-void structInit(SysStatistics *Sys, ptParams *ptPr)
+void structInit(SysStat *Sys, ptParams *ptPr)
 {
     int size = sizeof(Sys->CPUpercore) / sizeof(Sys->CPUpercore[0]);
 

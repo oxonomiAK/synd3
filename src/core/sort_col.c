@@ -24,16 +24,16 @@ int compName(const void* a, const void* b) {
 void sortColumns(ptParams *ptPr, d_arr *procesess){
     
     switch(ptPr->selectedColumn){
-        case 0:
+        case PID:
             qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compPid);
         break;
-        case 1: 
+        case NAME: 
             qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compName);
         break;
-        case 2:
+        case CPU:
             qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compCpuUsage);
         break;
-        case 3:
+        case MEM:
             qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compMemUsage);
         break;
     }
