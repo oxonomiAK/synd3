@@ -139,9 +139,10 @@ void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptPr)
     curs_set(0);
     timeout(100);
 
+    mouseinterval(0); //disables mouse click recognition as MOUSE1_CLICKED
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
-    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+    mousemask(ALL_MOUSE_EVENTS, NULL);
     getThreadCount(&Sys->coreCount, sizeof(Sys->coreCount));
     getCpuName(Sys->cpuName, sizeof(Sys->cpuName));
 }
