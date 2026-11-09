@@ -41,12 +41,12 @@ void appRun()
     d_arr prevProcesses = {0};
     d_arr currProcesses = {0};
     SysStat Sys;
-    ptParams ptPr;
+    ptParams ptableParams;
     TUIManager wins;
 
     int running = 1;
 
-    appInit(&wins, &Sys, &ptPr);
+    appInit(&wins, &Sys, &ptableParams);
 
     char prevBuffer[CPU_STAT_BUFFER_SIZE];
     char currentBuffer[CPU_STAT_BUFFER_SIZE];
@@ -72,7 +72,7 @@ void appRun()
 
     while (running)
     {
-        running = handleMainInput(&ptPr.selectedColumn, &ptPr.selectedProcess, &currProcesses, wins);
+        running = handleMainInput(&ptableParams, &currProcesses, wins);
         long long timepPoint = timeInMilliseconds();
 
         if ((timepPoint - lastSampleTime) >= sampleIntervalMs && updateAllowed)
@@ -114,8 +114,8 @@ void appRun()
         if ((timepPoint - lastRenderTime) >= renderIntervalMs)
         {
             processes = currProcesses;
-            sortColumns(&ptPr, &processes);
-            uiDraw(&wins, &processes, Sys, &ptPr);
+            sortColumns(&ptableParams, &processes);
+            uiDraw(&wins, &processes, Sys, &ptableParams);
 
             lastRenderTime = timepPoint;
         }
@@ -127,11 +127,11 @@ void appRun()
     appCleanup();
 }
 
-void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptPr)
+void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptableParams)
 {
     initscr(); /* Start curses mode 		  */
     start_color();
-    structInit(Sys, ptPr);
+    structInit(Sys, ptableParams);
     uiInit(wins, *Sys);
     
     noecho();
@@ -147,7 +147,7 @@ void appInit(TUIManager *wins, SysStat *Sys, ptParams *ptPr)
     getCpuName(Sys->cpuName, sizeof(Sys->cpuName));
 }
 
-void structInit(SysStat *Sys, ptParams *ptPr)
+void structInit(SysStat *Sys, ptParams *ptableParams)
 {
     int size = sizeof(Sys->CPUpercore) / sizeof(Sys->CPUpercore[0]);
 
@@ -169,9 +169,18 @@ void structInit(SysStat *Sys, ptParams *ptPr)
     Sys->totalTasks = 0;
     Sys->uptimeSeconds = 0;
 
-    ptPr->scrollOffset = 0;
-    ptPr->selectedColumn = 0;
-    ptPr->selectedProcess = 0;
+    ptableParams->scrollOffset = 0;
+    ptableParams->selectedColumn = 0;
+    ptableParams->selectedProcess = 0;
+
+    ptableParams->extraOpt.showExtOpt = 0;
+    ptableParams->extraOpt.selectedOption = 0;
+    ptableParams->extraOpt.sendSelect = 0;
+    size = sizeof(ptableParams->extraOpt.optionsStatus) / sizeof(ptableParams->extraOpt.optionsStatus[0]);
+    for (int i = 0; i < size; i++)
+    {
+        ptableParams->extraOpt.optionsStatus[i] = 0;
+    }
 }
 void appCleanup()
 {

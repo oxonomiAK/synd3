@@ -20,12 +20,13 @@ typedef enum{
 typedef enum{
     //start of left side
     PID,
+    CONTAINER,
     //end of left side
     NAME,
     //start of right side
     CPU,
     MEM, 
-    //end ofright side
+    //end of right side
     TOTAL_COLUMNS
 }Headers;
 
@@ -38,6 +39,7 @@ typedef enum{
 typedef struct{
     int isMidAligned;
     int isSelectionAffected;
+    int showColumn;
 
     attr_t attributes;
 }ColRenderParams;
@@ -60,15 +62,31 @@ typedef struct {
     int startX;
     // how much symbols print(usually uses in mvwaddnstr)
     int toPrint;
-
     ColRenderParams renderParams;
 }Columns;
+
+typedef struct{
+    int showExtOpt;
+    int optionsStatus[32];
+    int selectedOption;
+    int extraOptSize;
+    int sendSelect;
+}extOpt;
+
+typedef enum{
+    CONTAINER_TYPE
+}extraOpts;
 
 typedef struct{
     int selectedProcess;
     int selectedColumn;
     int scrollOffset;
+    int activeColumns[TOTAL_COLUMNS];
+    extOpt extraOpt;
 }ptParams;
+
+
+
 
 void configureColumns(Columns *c, SysStat Sys);
 void addColumn(Columns *col, int seq, char *h, int side, int prefW, int type, ColRenderParams *renderPrms);
@@ -80,6 +98,6 @@ void updateColHeader(Columns *columns, SysStat Sys);
 void fillHeaderPadding(Columns *columns);
 void fillWithSpaces(Columns *columns, char *str, int i);
 void setColumnDataPos(Columns *columns, int i, int *startX, int *toPrint, char *str);
-
+void drawExtras(WINDOW *process_table, extOpt *extraOpt, int *y, int maxx);
 
 #endif

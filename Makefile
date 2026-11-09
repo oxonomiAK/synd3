@@ -1,6 +1,6 @@
 CC=gcc
 CXX=g++
-CFLAGS=-Wall -Wextra -Iinclude
+CFLAGS=-Wall -Wextra -Iinclude -g
 LDFLAGS=-lncurses 
 
 SRC_C=$(shell find src -name '*.c')

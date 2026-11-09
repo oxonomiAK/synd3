@@ -5,11 +5,13 @@
 #include <stddef.h>    // size_t
 #include <stdint.h>    // uint64_t
 #include <sys/types.h> // pid_t
+#include "core/container_info.h"
 
     typedef struct
     {
         int pid;
         char name[256];
+        char contType[32];
         float cpu_usage;
         float mem_usage;
         unsigned long long process_ticks;
