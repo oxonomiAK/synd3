@@ -20,6 +20,9 @@ int compName(const void* a, const void* b) {
   	return strcmp(((ProcessInfo*)a)->name, ((ProcessInfo*)b)->name);
 }
 
+int compContainer(const void* a, const void* b) {
+  	return strcmp(((ProcessInfo*)b)->contType, ((ProcessInfo*)a)->contType);
+}
 
 void sortColumns(ptParams *ptPr, d_arr *procesess){
     
@@ -36,6 +39,8 @@ void sortColumns(ptParams *ptPr, d_arr *procesess){
         case MEM:
             qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compMemUsage);
         break;
+        case CONTAINER:
+            qsort(procesess->process, procesess->size, sizeof(ProcessInfo), compContainer);
     }
     
 }

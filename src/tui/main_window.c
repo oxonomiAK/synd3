@@ -16,7 +16,7 @@ void drawMainWindow(WINDOW *main_window)
 
 
     wattron(main_window, COLOR_PAIR(FOOTER_COLOR));
-    const char *footer = " F1:Help  F9:Kill  F10:Quit ";
+    const char *footer = " F1:Help  F8:Extras  F9:Kill  F10:Quit ";
     int footerLen = (int)(strlen(footer));
     mvwprintw(main_window, maxy - 1, maxx - footerLen, "%s", footer);
     wattroff(main_window, COLOR_PAIR(FOOTER_COLOR));

@@ -128,6 +128,7 @@ void colorPairInit()
     init_pair(CPU_TEXT_COLOR, COLOR_CYAN, COLOR_BLACK);
     init_pair(MEM_TEXT_COLOR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(FOOTER_COLOR, COLOR_CYAN, COLOR_BLACK);
+    init_pair(CONTAINER_COLOR, COLOR_GREEN, COLOR_BLACK);
 }
 
 void showAbout()

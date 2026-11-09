@@ -132,6 +132,7 @@ size_t get_process_list(ProcessInfo *buffer, size_t max)
         // buffer[count].cpu_usage = 0.0f;
         // buffer[count].mem_usage = 0.0f;
         get_process_mem_usage(pid, &buffer[count].mem_usage);
+        get_container_info(pid, buffer[count].contType);
         get_process_ticks(pid, &buffer[count].process_ticks);
         // buffer[count].process_ticks = 0.0f;
         ++count;

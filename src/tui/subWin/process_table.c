@@ -17,36 +17,56 @@ void configureColumns(Columns *columns, SysStat Sys){
     
     //create PID column
     renderParams[PID].isSelectionAffected = 1;
+    renderParams[PID].showColumn = 1;
     addColumn(columns, PID, "PID", LEFT, PID_WIDTH, PADDING, &renderParams[PID]);
 
     //create NAME column
     renderParams[NAME].isSelectionAffected = 1;
+    renderParams[NAME].showColumn = 1;
     addColumn(columns, NAME, "NAME", LEFT, 0, PADDING, &renderParams[NAME]);
 
     //create CPU column
     sprintf(temp, "CPU%% %.2f", Sys.CPUtotal);
     renderParams[CPU].isMidAligned = 1;
     renderParams[CPU].attributes = COLOR_PAIR(CPU_TEXT_COLOR);
+    renderParams[CPU].showColumn = 1;
     addColumn(columns, CPU, temp, RIGHT, 0, AUTO, &renderParams[CPU]);
     
     //create MEM column
     sprintf(temp, "MEM%% %.2f", Sys.percentMemUsed);
     renderParams[MEM].isMidAligned = 1;
     renderParams[MEM].attributes = COLOR_PAIR(MEM_TEXT_COLOR);
+    renderParams[MEM].showColumn = 1;
     addColumn(columns, MEM, temp, RIGHT, 0, AUTO, &renderParams[MEM]);
+
+    //create CONTAINER column
+    renderParams[CONTAINER].isMidAligned = 1;
+    renderParams[CONTAINER].isSelectionAffected = 1;
+    renderParams[CONTAINER].attributes = COLOR_PAIR(CONTAINER_COLOR);
+    renderParams[CONTAINER].showColumn = 1;
+    addColumn(columns, CONTAINER, "CONTAINER TYPE", LEFT, strlen("CONTAINER TYPE"), FIXED, &renderParams[CONTAINER]); 
+	
 }
 
 
-void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptParams *ptPr)
+void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptParams *pTableParams)
 {
     if(getmaxy(stdscr) >= 5 && getmaxx(process_table) > 1){
         int maxx = 0, maxy = 0;
         char buff[STR_BUFF_SIZE] = {0};
-        int y = 1;
+        int y = 0;
         attr_t attributes = 0;
         getmaxyx(process_table, maxy, maxx);
         werase(process_table);
         
+        if(pTableParams->extraOpt.showExtOpt){
+            drawExtras(process_table, &pTableParams->extraOpt, &y, maxx);
+            if(!columns[pTableParams->selectedColumn].renderParams.showColumn){
+                pTableParams->selectedColumn++;
+            }
+        }
+
+        columns[CONTAINER].renderParams.showColumn = pTableParams->extraOpt.optionsStatus[CONTAINER_TYPE];
         
         updateColHeader(columns, Sys);
         calculateLayout(columns, maxx);
@@ -57,24 +77,35 @@ void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptPa
         //=======================================
         //print all headers
         
+
+
         for(int i = 0; i<TOTAL_COLUMNS; i++){
-            if(i == ptPr->selectedColumn)
+            pTableParams->activeColumns[i] = columns[i].renderParams.showColumn;
+            if(!columns[i].renderParams.showColumn){
+                
+                continue;
+            }
+            if(i == pTableParams->selectedColumn && !pTableParams->extraOpt.showExtOpt)
                 attributes = A_BOLD | COLOR_PAIR(HIGHLIGHT_COLOR);
             else
                 attributes = COLOR_PAIR(HEADER_COLOR);
 
             wattron(process_table, attributes);
-            mvwaddnstr(process_table, 0, columns[i].startX, columns[i].header, columns[i].toPrint);
+            mvwaddnstr(process_table, y, columns[i].startX, columns[i].header, columns[i].toPrint);
             wattroff(process_table, attributes);
             attributes = 0;
         }
+        y++;
         //======================================
         
-        for(int i = ptPr->scrollOffset; i<procesess->size; i++, y++)
+        for(int i = pTableParams->scrollOffset; i<procesess->size; i++, y++)
         {
             int startx = 0;
             int toPrint = 0;
             for(int j = 0; j<TOTAL_COLUMNS; j++){
+                if(!columns[j].renderParams.showColumn)
+                    continue;
+                
                 switch (j)
                 {
                 case MEM:
@@ -93,6 +124,10 @@ void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptPa
                     sprintf(buff, "%d", procesess->process[i].pid);
                     break;
 
+                case CONTAINER:
+                    sprintf(buff, "%s", procesess->process[i].contType);
+                    break;
+
                 default:
                     continue;
                 }
@@ -102,8 +137,8 @@ void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptPa
                     fillWithSpaces(columns, buff, j);
 
                 attributes = columns[j].renderParams.attributes;
-                if(i == ptPr->selectedProcess && columns[j].renderParams.isSelectionAffected)
-                    attributes =  COLOR_PAIR(SELECTED_COLOR);
+                if(i == pTableParams->selectedProcess && columns[j].renderParams.isSelectionAffected && !pTableParams->extraOpt.showExtOpt)
+                    attributes = COLOR_PAIR(SELECTED_COLOR);
 
 
                 
@@ -117,13 +152,80 @@ void drawProcessTable(WINDOW *process_table, d_arr *procesess, SysStat Sys, ptPa
         }
         
         //if last selected process dissapears selected process will be last existing process
-        if(ptPr->selectedProcess >= procesess->size)
-            ptPr->selectedProcess = procesess->size-1;
+        if(pTableParams->selectedProcess >= procesess->size)
+            pTableParams->selectedProcess = procesess->size-1;
 
         wnoutrefresh(process_table);
-        calcScrollOffset(ptPr->selectedProcess, &ptPr->scrollOffset, maxy, procesess->size);
+        calcScrollOffset(pTableParams->selectedProcess, &pTableParams->scrollOffset, maxy, procesess->size);
     }
     
+}
+
+void drawExtras(WINDOW *process_table, extOpt *extraOpt, int *y, int maxx){
+
+    char *title = "Extra options";
+
+    char *options[] = {"Show container type (if exist)",
+                    "More options will be soon..."};
+
+    extraOpt->extraOptSize = (sizeof(options)/sizeof(char*));
+
+    int offPos = 0;
+    int onPos = 0;
+    int titlePos = 0;
+    attr_t attributes = 0;
+    if(maxx > 50){
+        offPos = maxx - 7;
+        onPos = maxx - 17;
+        titlePos = (maxx-strlen(title) )/2;
+    }else{
+        onPos = 50/2 + 7 + 1;
+        offPos = 50/2 + 17 + 1;
+        titlePos = (50-strlen(title) )/2;
+    }
+
+    
+    mvwaddnstr(process_table, (*y)++, titlePos, title, maxx-titlePos);
+    mvwaddnstr(process_table, *y, offPos, "OFF", maxx);
+    mvwaddnstr(process_table, (*y)++, onPos, "ON", maxx);
+
+    if(extraOpt->sendSelect && extraOpt->optionsStatus[extraOpt->selectedOption]){
+        extraOpt->sendSelect = 0;
+        extraOpt->optionsStatus[extraOpt->selectedOption] = 0;
+    }else if(extraOpt->sendSelect && !extraOpt->optionsStatus[extraOpt->selectedOption]){
+        extraOpt->sendSelect = 0;
+        extraOpt->optionsStatus[extraOpt->selectedOption] = 1;
+    }
+
+    
+    
+
+    for(int i=0; i<extraOpt->extraOptSize; i++){
+
+
+        if(extraOpt->optionsStatus[i] && i < extraOpt->extraOptSize-1){
+            mvwaddnstr(process_table, *y, onPos-1, "[ X ]", maxx-onPos+1);
+            mvwaddnstr(process_table, *y, offPos-1, "[  ]\n", maxx-offPos+1);
+        }else if(i < extraOpt->extraOptSize-1){
+            mvwaddnstr(process_table, *y, onPos-1, "[  ]", maxx-onPos+1);
+            mvwaddnstr(process_table, *y, offPos-1, "[ X ]\n", maxx-offPos+1);
+        }
+
+        if(extraOpt->selectedOption == i)
+            attributes = COLOR_PAIR(SELECTED_COLOR);
+        else
+            attributes = 0;
+
+        wattron(process_table, attributes);
+        mvwaddnstr(process_table, (*y)++, 0, options[i], maxx);
+        wattroff(process_table, attributes);
+
+    }
+
+
+    
+    mvwaddnstr(process_table, (*y)++, 0, "", 0);
+    whline(process_table, ACS_HLINE, maxx);
 }
 
 
@@ -134,7 +236,7 @@ void addColumn(Columns *columns, int seq, char *header, int side, int prefW, int
     columns[seq].headerType = type;
     columns[seq].prefWidth = prefW;
     columns[seq].renderParams = *renderPrms;
-
+    
 
 }
 
@@ -145,6 +247,8 @@ void calculateLayout(Columns *columns, int maxx)
 
     int nameWidth = 0;
     for(int i=0; i<TOTAL_COLUMNS; i++){
+        if(!columns[i].renderParams.showColumn)
+            continue;
         nameWidth+=columns[i].prefWidth+GAP;
     }
     nameWidth-=columns[NAME].prefWidth+GAP;
@@ -154,6 +258,8 @@ void calculateLayout(Columns *columns, int maxx)
 
     if (collapse) {
         for(int i=0; i<TOTAL_COLUMNS; i++){
+            if(!columns[i].renderParams.showColumn)
+                continue;
             //special scenarios
             /*
                 NAME has its own behavior because it located between left aligned and right aligned columns.
@@ -183,6 +289,8 @@ void calculateLayout(Columns *columns, int maxx)
         }
     } else {
         for(int i=0; i<TOTAL_COLUMNS; i++){
+            if(!columns[i].renderParams.showColumn)
+                continue;
             //special scenarios
             if(i == NAME || columns[i].side){
                 continue;

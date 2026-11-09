@@ -6,11 +6,16 @@ void handle_winch(TUIManager wins)
     resize(&wins);
 }
 
-int handleMainInput(int *selectedColumn, int *selectedPorcess, d_arr *processes, TUIManager wins)
+int handleMainInput(ptParams *pTableParams, d_arr *processes, TUIManager wins)
 {
 
     static int aboutActive = 0;
     static int popupActive = 0;
+    static int extraOptActive = 0;
+
+    int *selectedPorcess = &pTableParams->selectedProcess;
+    int *selectedColumn = &pTableParams->selectedColumn;
+
 
     if (aboutActive)
     {
@@ -22,6 +27,11 @@ int handleMainInput(int *selectedColumn, int *selectedPorcess, d_arr *processes,
         popupActive = handlePopupInput(wins, *selectedPorcess, processes);
         return 1;
     }
+    if(extraOptActive){
+        extraOptActive = handleExtraOptInput(wins, &pTableParams->extraOpt);
+        return 1;
+    }
+
 
     MEVENT event;
     int ch = wgetch(stdscr);
@@ -40,10 +50,21 @@ int handleMainInput(int *selectedColumn, int *selectedPorcess, d_arr *processes,
         break;
     case KEY_LEFT:
         *selectedColumn = (*selectedColumn - 1 + TOTAL_COLUMNS) % TOTAL_COLUMNS;
+        if(!pTableParams->activeColumns[*selectedColumn])
+            *selectedColumn = (*selectedColumn - 1 + TOTAL_COLUMNS) % TOTAL_COLUMNS;
         break;
+
     case KEY_RIGHT:
         *selectedColumn = (*selectedColumn + 1) % TOTAL_COLUMNS;
+        if(!pTableParams->activeColumns[*selectedColumn])
+            *selectedColumn = (*selectedColumn + 1) % TOTAL_COLUMNS;
         break;
+
+    case KEY_F(8):
+        extraOptActive = 1;
+        pTableParams->extraOpt.showExtOpt = 1;
+        break;
+
     case KEY_F(9):
         showPopup(&wins, getmaxy(wins.main_win), getmaxx(wins.main_win));
         noUpdate();
@@ -78,6 +99,38 @@ int handleMainInput(int *selectedColumn, int *selectedPorcess, d_arr *processes,
         break;
     }
     return 1;
+}
+
+
+int handleExtraOptInput(TUIManager wins, extOpt *extraOpt){
+    int ch = wgetch(stdscr);
+    switch (ch)
+    {
+    case KEY_RESIZE:
+        handle_winch(wins);
+        break;
+    case KEY_UP:
+        if (extraOpt->selectedOption > 0)
+            extraOpt->selectedOption -= 1;
+        break;
+    case KEY_DOWN:
+        if (extraOpt->selectedOption < extraOpt->extraOptSize - 1)
+            extraOpt->selectedOption += 1;
+        break;
+    case KEY_F(8):
+        extraOpt->showExtOpt = 0;
+        return 0;
+    case KEY_ENTER:
+    case '\n':
+        extraOpt->sendSelect = 1;
+        break;
+    case -1:
+        break;
+    default:
+        break;
+    }
+    return 1;
+
 }
 
 int handleAboutInput(TUIManager wins)

@@ -19,7 +19,8 @@ typedef enum{
         MEM_TEXT_COLOR,
         FOOTER_COLOR,
         YES_COLOR,
-        NO_COLOR
+        NO_COLOR,
+        CONTAINER_COLOR
 }Colors;
 
 #endif
